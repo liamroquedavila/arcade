@@ -72,7 +72,7 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,8vw,72px);lin
   box-shadow:inset 0 -4px 0 #0005,inset 0 0 0 2px var(--line);font-family:var(--pixel);font-size:13px;touch-action:none;user-select:none;-webkit-user-select:none}
 .pad button:active{transform:translateY(2px);box-shadow:inset 0 -2px 0 #0005,inset 0 0 0 2px var(--c,var(--sun))}
 .pad button.wide{flex:1}
-.hint{color:var(--muted);font-size:14px;text-align:center;margin:0;max-width:56ch}
+.hint{color:var(--muted);font-size:14px;text-align:center;margin:0;max-width:60ch}
 kbd{font-family:var(--pixel);font-size:10px;background:var(--panel-2);padding:3px 6px;border-radius:5px;color:var(--ink)}
 footer{color:var(--muted);font-size:13px}
 @media (prefers-reduced-motion:reduce){.coin{animation:none}.cart{transition:none}.cart:hover{transform:none}}
@@ -83,21 +83,21 @@ footer{color:var(--muted);font-size:13px}
 <div class="wrap">
   <section id="menu" class="wrap" style="gap:32px">
     <header class="marquee">
-      <span class="coin">INSERTA MONEDA ▸ 1 CRÉDITO</span>
+      <span class="coin">INSERTA MONEDA ‚ñ∏ 1 CR√âDITO</span>
       <h1>Arcade de Bolsillo</h1>
-      <p class="lede">Diez clásicos para jugar en el navegador, con teclado o con el dedo. Tus récords se guardan en este dispositivo.</p>
+      <p class="lede">Diez cl√°sicos con niveles que se ponen cada vez m√°s dif√≠ciles. Se juegan con teclado o con el dedo, y tus r√©cords se guardan en este dispositivo.</p>
     </header>
     <div class="grid" id="grid"></div>
-    <footer><kbd>P</kbd> pausa · <kbd>Esc</kbd> vuelve al menú</footer>
+    <footer><kbd>P</kbd> pausa ¬∑ <kbd>Esc</kbd> vuelve al men√∫</footer>
   </section>
 
   <section id="game" class="game" hidden>
     <div class="topbar">
-      <button class="back" id="back">← Menú</button>
+      <button class="back" id="back">‚Üê Men√∫</button>
       <h2 class="gname" id="gname">Juego</h2>
       <div class="hud">
         <div class="stat"><span>Puntos</span><b id="score">0</b></div>
-        <div class="stat"><span>Récord</span><b id="best">0</b></div>
+        <div class="stat"><span>R√©cord</span><b id="best">0</b></div>
       </div>
     </div>
     <canvas id="cv"></canvas>
@@ -114,11 +114,14 @@ const BODY = n => `600 ${n}px "Chakra Petch", system-ui, sans-serif`;
 const C = {bg:'#17142e',deep:'#120f26',panel:'#221d45',panel2:'#2c2659',line:'#3b3478',ink:'#f4efff',muted:'#a79fd6',sun:'#ffcf3f',coral:'#ff6f61',teal:'#35d0c6',violet:'#c46bff'};
 const held = new Set();
 const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
+const plural = (n, w) => `${n} ${w}${n===1?'':'s'}`;
 
 const store = {
   get(k){ try { return +localStorage.getItem('arcade:'+k) || 0 } catch(e){ return 0 } },
   set(k,v){ try { localStorage.setItem('arcade:'+k, v) } catch(e){} }
 };
+// Generador aleatorio con semilla: cada nivel de Geometry Dash es siempre igual
+function rng(seed){ return () => { seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296 } }
 
 function label(c, txt, x, y, size, color, align='center'){
   c.font = PIX(size); c.textAlign = align; c.textBaseline = 'middle';
@@ -129,8 +132,9 @@ function banner(c, w, h, title, lines, color){
   const bh = 64 + lines.length*22;
   c.fillStyle = 'rgba(18,15,38,.85)'; c.fillRect(0, h/2 - bh/2, w, bh);
   c.fillStyle = color; c.fillRect(0, h/2 - bh/2, w, 3); c.fillRect(0, h/2 + bh/2 - 3, w, 3);
-  label(c, title, w/2, h/2 - bh/2 + 30, 18, color);
-  c.font = BODY(15); c.fillStyle = C.ink; c.textAlign = 'center';
+  const size = Math.min(18, Math.floor((w-24)/title.length));
+  label(c, title, w/2, h/2 - bh/2 + 30, size, color);
+  c.font = BODY(15); c.fillStyle = C.ink; c.textAlign = 'center'; c.textBaseline = 'middle';
   lines.forEach((l,i) => c.fillText(l, w/2, h/2 - bh/2 + 64 + i*22));
 }
 function rr(c, x, y, w, h, r){
@@ -142,68 +146,124 @@ function rr(c, x, y, w, h, r){
 /* ---------- GEOMETRY DASH ---------- */
 const Dash = {
   id:'dash', name:'Geometry Dash', w:480, h:300, color:'#ff5fa2', thumbY:0, tapOnDown:true,
-  desc:'Salta al ritmo, esquiva los pinchos y sube a los bloques. ¿Hasta dónde llegas?', keys:'Espacio o toque',
-  pad:[{a:'action', l:'Saltar', wide:true, held:1}],
-  hint:'<kbd>Espacio</kbd>, <kbd>↑</kbd>, clic o toque para saltar. Mantén pulsado para encadenar saltos.',
-  G:240, S:28, X:110, attempt:1,
-  reset(){ Object.assign(this,{state:'ready',dist:0,y:this.G-this.S,vy:0,rot:0,ground:true,obs:[],next:620,queued:0,parts:[],t:0,score:0}) },
+  desc:'Niveles infinitos cada vez m√°s r√°pidos, con pinchos, saltadores, orbes y tramos en cohete.', keys:'Espacio o toque',
+  pad:[{a:'left',l:'‚óÄ'},{a:'action',l:'Saltar',wide:true,held:1},{a:'right',l:'‚ñ∂'}],
+  hint:'<kbd>Espacio</kbd>, <kbd>‚Üë</kbd>, clic o toque para saltar. En el cohete, mant√©n pulsado para subir. Las almohadillas amarillas te lanzan y los aros amarillos dan un salto extra. Antes de empezar, <kbd>‚óÄ ‚ñ∂</kbd> cambian de nivel.',
+  G:240, S:28, X:110, lvl:1, attempt:1,
+  speed(){ return Math.min(250 + (this.lvl-1)*18, 430) },
+  reset(){
+    this.max = Math.max(1, store.get('dash-max'));
+    if (!this.lvlSet){ this.lvl = this.max; this.lvlSet = true }
+    Object.assign(this,{state:'ready',dist:0,y:this.G-this.S,vy:0,rot:0,ground:true,queued:0,parts:[],t:0,mode:'cube',flash:0});
+    this.build(); this.score = (this.lvl-1)*100;
+  },
+  setLvl(n){ this.lvl = clamp(n, 1, this.max); this.attempt = 1; this.reset() },
+  spike(x, base=this.G){ this.obs.push({k:'s', x, y:base-30, w:30, h:30}) },
+  col(x,n){ this.obs.push({k:'b', x, y:this.G-30*n, w:30, h:30*n}) },
+  build(){
+    const R = rng(this.lvl*7919 + 13), L = this.lvl, B = 30, G = this.G;
+    this.obs = [];
+    this.len = 2400 + L*600;
+    const ships = L < 2 ? [] : L < 5 ? [.45] : [.3, .68];
+    let x = 600, si = 0;
+    while (x < this.len - 320){
+      if (si < ships.length && x > this.len*ships[si]){
+        si++;
+        const sl = 800 + L*80, gap = Math.max(92, 150 - L*6), step = Math.max(120, 175 - L*6, this.speed()*.35);
+        const maxD = Math.min(75, 30 + L*5, step/this.speed()*200);
+        this.obs.push({k:'p', x, w:24, mode:'ship'});
+        let gy = G - 70;
+        for (let px = x + 240; px < x + sl; px += step){
+          gy = clamp(gy + (R()*2-1)*maxD, 30 + gap/2, G - gap/2 - 10);
+          this.obs.push({k:'b', x:px, y:0, w:30, h:gy-gap/2});
+          this.obs.push({k:'b', x:px, y:gy+gap/2, w:30, h:G-(gy+gap/2)});
+        }
+        this.obs.push({k:'p', x:x+sl+60, w:24, mode:'cube'});
+        x += sl + 280; continue;
+      }
+      const pool = ['s1','s2','hop','stairs'];
+      if (L >= 2) pool.push('s3','plat');
+      if (L >= 3) pool.push('pad','bspike','stairs3');
+      if (L >= 4) pool.push('orb','s3');
+      if (L >= 6) pool.push('orb','pad','plat','bspike');
+      let len;
+      switch (pool[R()*pool.length|0]){
+        case 's1': this.spike(x); len = B; break;
+        case 's2': this.spike(x); this.spike(x+B); len = 2*B; break;
+        case 's3': for (let i=0;i<3;i++) this.spike(x+i*B); len = 3*B; break;
+        case 'hop': this.col(x,1); this.col(x+B,1); this.spike(x+2*B); this.spike(x+3*B); len = 4*B; break;
+        case 'stairs': this.col(x,1); this.col(x+B,2); this.col(x+2*B,2); len = 3*B; break;
+        case 'stairs3': this.col(x,1); this.col(x+B,1); this.col(x+2*B,2); this.col(x+3*B,2); this.col(x+4*B,3); this.col(x+5*B,3); this.spike(x+6*B); this.spike(x+7*B); len = 8*B; break;
+        case 'plat': this.col(x,1); this.obs.push({k:'b', x:x+3*B, y:G-60, w:5*B, h:14}); for (let i=2;i<8;i++) this.spike(x+i*B); len = 8*B; break;
+        case 'bspike': for (let i=0;i<7;i++) this.col(x+i*B,1); this.spike(x+4*B, G-30); len = 7*B; break;
+        case 'pad': this.obs.push({k:'pad', x, y:G-8, w:30, h:8}); for (let i=2;i<7;i++) this.spike(x+i*B); len = 8*B; break;
+        case 'orb': for (let i=0;i<7;i++) this.spike(x+i*B); this.obs.push({k:'o', x:x+75, y:G-105, w:30, h:30}); len = 7*B; break;
+      }
+      x += len + Math.max(130, 250 - L*12, this.speed()*.55) + R()*130;
+    }
+  },
   demo(){
-    this.reset(); this.state='play';
+    this.reset(); this.state='play'; this.obs=[]; this.len=1e9;
     this.col(200,1); this.col(230,2); this.col(260,2); this.spike(330); this.spike(360);
+    this.obs.push({k:'o', x:345, y:this.G-105, w:30, h:30}, {k:'p', x:430, w:24, mode:'ship'});
     this.y = this.G - this.S - 70; this.rot = .5; this.ground = false;
   },
-  spike(x){ this.obs.push({k:'s', x, y:this.G-30, w:30, h:30}) },
-  col(x,n){ this.obs.push({k:'b', x, y:this.G-30*n, w:30, h:30*n}) },
-  gen(){
-    const B = 30;
-    while (this.next < this.dist + this.w + 120){
-      const x = this.next, r = Math.random(), lvl = Math.min(1, this.dist/6000);
-      let len;
-      if (r < .25){ this.spike(x); len = B }
-      else if (r < .42){ this.spike(x); this.spike(x+B); len = 2*B }
-      else if (r < .52 && lvl > .15){ for (let i=0;i<3;i++) this.spike(x+i*B); len = 3*B }
-      else if (r < .68){ this.col(x,1); this.col(x+B,1); this.spike(x+2*B); this.spike(x+3*B); len = 4*B }
-      else if (r < .84){ this.col(x,1); this.col(x+B,2); this.col(x+2*B,2); len = 3*B }
-      else { this.col(x,1); this.obs.push({k:'b', x:x+3*B, y:this.G-60, w:5*B, h:14}); for (let i=2;i<8;i++) this.spike(x+i*B); len = 8*B }
-      this.next = x + len + 210 + Math.random()*170 - lvl*60;
-    }
-    this.obs = this.obs.filter(o => o.x + o.w > this.dist - 60);
-  },
   input(a){
+    if ((a==='left'||a==='right') && this.state!=='play'){ this.setLvl(this.lvl + (a==='right'?1:-1)); return }
     if (!['action','tap','up'].includes(a)) return;
     if (this.state==='over'){ if (this.t > .5){ this.attempt++; this.reset(); this.state='play' } return }
+    if (this.state==='win'){ if (this.t > .6){ this.setLvl(this.lvl+1); this.state='play' } return }
     if (this.state==='ready') this.state='play';
     this.queued = .15;
   },
-  die(){
-    this.state='over'; this.t=0;
-    for (let i=0;i<26;i++){ const a=Math.random()*7, s=80+Math.random()*260;
-      this.parts.push({x:this.dist+this.X+this.S/2, y:this.y+this.S/2, vx:Math.cos(a)*s, vy:Math.sin(a)*s-120, life:.5+Math.random()*.4, col:i%2?C.sun:C.teal}) }
+  burst(n, cols, spread){
+    const cx = this.dist + this.X + this.S/2, cy = this.y + this.S/2;
+    for (let i=0;i<n;i++){ const a = Math.random()*7, s = 80 + Math.random()*spread;
+      this.parts.push({x:cx, y:cy, vx:Math.cos(a)*s, vy:Math.sin(a)*s-120, life:.5+Math.random()*.5, col:cols[i%cols.length]}) }
   },
+  die(){ this.state='over'; this.t=0; this.burst(26, [C.sun, C.teal], 260) },
+  win(){
+    this.state='win'; this.t=0; this.score = this.lvl*100;
+    if (this.lvl >= this.max){ this.max = this.lvl+1; store.set('dash-max', this.max) }
+    this.burst(40, [C.sun, '#ff5fa2', C.teal, '#6be37a'], 340);
+  },
+  pct(){ return clamp(Math.floor((this.dist+this.X)/this.len*100), 0, 100) },
   update(dt){
     for (const p of this.parts){ p.x += p.vx*dt; p.y += p.vy*dt; p.vy += 900*dt; p.life -= dt }
     this.parts = this.parts.filter(p => p.life > 0);
+    this.flash = Math.max(0, this.flash-dt);
     if (this.state==='ready') return;
-    if (this.state==='over'){ this.t += dt; return }
-    const S = this.S, sp = 270 + Math.min(130, this.dist/60);
-    this.dist += sp*dt; this.score = Math.floor(this.dist/50);
-    this.gen();
+    if (this.state!=='play'){ this.t += dt; return }
+    const S = this.S;
+    this.dist += this.speed()*dt;
+    const cx = this.dist + this.X;
+    this.score = (this.lvl-1)*100 + Math.min(99, this.pct());
+    if (cx >= this.len) return this.win();
     this.queued = Math.max(0, this.queued - dt);
-    const wants = held.has('action') || held.has('up') || held.has('ptr') || this.queued > 0;
+    const hold = held.has('action') || held.has('up') || held.has('ptr');
+    const wants = hold || this.queued > 0;
+    for (const o of this.obs) if (o.k==='p' && !o.used && cx + S > o.x){ o.used = true; this.mode = o.mode; this.flash = .3; this.vy = Math.min(this.vy, 0) }
+    if (this.mode==='ship') return this.shipStep(dt, hold, cx);
     if (this.ground && wants){ this.vy = -640; this.ground = false; this.queued = 0 }
     const prevB = this.y + S;
     this.vy += 2300*dt; this.y += this.vy*dt;
     this.ground = false;
     if (this.y + S >= this.G){ this.y = this.G - S; this.vy = 0; this.ground = true }
-    const cx = this.dist + this.X;
     for (const o of this.obs){
-      if (o.x > cx + S || o.x + o.w < cx) continue;
+      if (o.x > cx + S + 30 || o.x + o.w < cx - 30) continue;
       if (o.k==='b'){
         if (cx + S > o.x + 2 && cx < o.x + o.w - 2){
           if (prevB <= o.y + 1 && this.y + S >= o.y){ this.y = o.y - S; this.vy = 0; this.ground = true }
           else if (this.y + S > o.y + 3 && this.y < o.y + o.h) return this.die();
         }
-      } else if (cx + S > o.x + 9 && cx < o.x + 21 && this.y + S > o.y + 10) return this.die();
+      } else if (o.k==='s'){
+        if (cx + S > o.x + 9 && cx < o.x + 21 && this.y + S > o.y + 10 && this.y < o.y + o.h) return this.die();
+      } else if (o.k==='pad'){
+        if (cx + S > o.x && cx < o.x + o.w && this.y + S >= o.y - 2 && this.vy >= 0){ this.vy = -900; this.ground = false; this.flash = .12 }
+      } else if (o.k==='o'){
+        const dx = (cx + S/2) - (o.x + 15), dy = (this.y + S/2) - (o.y + 15);
+        if (!o.used && !this.ground && wants && Math.abs(dx) < 30 && Math.abs(dy) < 30){ o.used = true; this.vy = -660; this.queued = 0 }
+      }
     }
     const q = Math.PI/2;
     if (this.ground){
@@ -211,9 +271,23 @@ const Dash = {
       if (Math.random() < .5) this.parts.push({x:cx+2, y:this.y+S-3, vx:-60-Math.random()*60, vy:-Math.random()*60, life:.25, col:C.sun});
     } else this.rot += 5.6*dt;
   },
+  shipStep(dt, hold, cx){
+    const H = 20, S = this.S;
+    this.vy = clamp(this.vy + (hold ? -1500 : 1200)*dt, -380, 380);
+    this.y += this.vy*dt;
+    if (this.y < 0){ this.y = 0; this.vy = 0 }
+    if (this.y + H > this.G){ this.y = this.G - H; this.vy = 0 }
+    this.rot = clamp(this.vy/600, -.5, .5);
+    for (const o of this.obs){
+      if (o.k!=='b' && o.k!=='s') continue;
+      if (o.x > cx + S || o.x + o.w < cx) continue;
+      if (cx + S - 3 > o.x && cx + 3 < o.x + o.w && this.y + H - 2 > o.y && this.y + 2 < o.y + o.h) return this.die();
+    }
+    if (Math.random() < .8) this.parts.push({x:cx-2, y:this.y+H/2+4, vx:-140-Math.random()*80, vy:(Math.random()-.5)*60, life:.3, col:hold?'#ff9f43':C.muted});
+  },
   draw(c){
     const W=this.w, H=this.h, G=this.G, cam=this.dist, S=this.S;
-    const hue = (230 + this.dist/25) % 360;
+    const hue = (200 + this.lvl*47 + this.dist/40) % 360;
     const g = c.createLinearGradient(0,0,0,G); g.addColorStop(0,`hsl(${hue},55%,20%)`); g.addColorStop(1,`hsl(${(hue+30)%360},60%,36%)`);
     c.fillStyle = g; c.fillRect(0,0,W,G);
     c.fillStyle = 'rgba(255,255,255,.06)';
@@ -223,62 +297,99 @@ const Dash = {
     for (let x = -(cam % 60); x < W; x += 60) c.strokeRect(x, G+2, 60, H-G);
     c.fillStyle = '#fff'; c.fillRect(0,G,W,2);
     for (const o of this.obs){
-      const x = o.x - cam; if (x > W || x + o.w < 0) continue;
+      const x = o.x - cam; if (x > W + 20 || x + o.w < -20) continue;
       if (o.k==='b'){
         c.fillStyle = C.deep; c.fillRect(x, o.y, o.w, o.h);
         c.strokeStyle = '#fff'; c.lineWidth = 2; c.strokeRect(x+1, o.y+1, o.w-2, o.h-2);
-        if (o.h > 20){ c.strokeStyle = 'rgba(255,255,255,.3)'; for (let yy=o.y; yy<o.y+o.h; yy+=30) for (let xx=x; xx<x+o.w; xx+=30) c.strokeRect(xx+7, yy+7, 16, 16) }
-      } else {
+        if (o.h > 20 && o.w <= 30){ c.strokeStyle = 'rgba(255,255,255,.3)'; for (let yy=o.y+o.h-30; yy>=o.y-1; yy-=30) c.strokeRect(x+7, yy+7, 16, 16) }
+      } else if (o.k==='s'){
         c.fillStyle = C.deep; c.beginPath(); c.moveTo(x+1, o.y+30); c.lineTo(x+15, o.y+1); c.lineTo(x+29, o.y+30); c.closePath(); c.fill();
         c.strokeStyle = '#fff'; c.lineWidth = 2; c.stroke();
+      } else if (o.k==='pad'){
+        c.fillStyle = C.sun; c.beginPath(); c.ellipse(x+15, G, 15, 8, 0, Math.PI, 0); c.fill();
+        c.fillStyle = 'rgba(255,207,63,.25)'; c.fillRect(x+4, G-34, 22, 26);
+      } else if (o.k==='o'){
+        c.globalAlpha = o.used ? .35 : 1;
+        c.fillStyle = 'rgba(255,207,63,.3)'; c.beginPath(); c.arc(x+15, o.y+15, 16, 0, 7); c.fill();
+        c.strokeStyle = C.sun; c.lineWidth = 4; c.beginPath(); c.arc(x+15, o.y+15, 11, 0, 7); c.stroke();
+        c.globalAlpha = 1;
+      } else if (o.k==='p'){
+        const col = o.mode==='ship' ? '#ff5fa2' : '#6be37a';
+        c.fillStyle = col + '44'; c.beginPath(); c.ellipse(x+12, G-70, 13, 68, 0, 0, 7); c.fill();
+        c.strokeStyle = col; c.lineWidth = 4; c.stroke();
       }
     }
+    const fx = this.len - cam;
+    if (fx < W + 20){ for (let yy=0; yy<G; yy+=12) for (let k=0;k<2;k++){ c.fillStyle = ((yy/12+k)%2) ? '#fff' : C.deep; c.fillRect(fx+k*8, yy, 8, 12) } }
     for (const p of this.parts){ c.globalAlpha = clamp(p.life*2,0,1); c.fillStyle = p.col; c.fillRect(p.x-cam-3, p.y-3, 6, 6) }
     c.globalAlpha = 1;
     if (this.state!=='over'){
-      c.save(); c.translate(this.X+S/2, this.y+S/2); c.rotate(this.rot);
-      c.fillStyle = C.sun; c.fillRect(-S/2,-S/2,S,S);
-      c.strokeStyle = C.deep; c.lineWidth = 3; c.strokeRect(-S/2+1.5,-S/2+1.5,S-3,S-3);
-      c.fillStyle = C.teal; c.fillRect(-8,-8,16,16);
-      c.fillStyle = C.deep; c.fillRect(-5,-4,3,5); c.fillRect(2,-4,3,5);
-      c.restore();
+      if (this.mode==='ship'){
+        c.save(); c.translate(this.X+14, this.y+10); c.rotate(this.rot);
+        c.fillStyle = C.sun; c.fillRect(-8,-15,13,13); c.strokeStyle = C.deep; c.lineWidth = 2; c.strokeRect(-8,-15,13,13);
+        c.fillStyle = '#ff5fa2'; c.beginPath(); c.moveTo(-16,8); c.lineTo(18,8); c.lineTo(9,-3); c.lineTo(-14,-3); c.closePath(); c.fill();
+        c.strokeStyle = C.deep; c.lineWidth = 2; c.stroke();
+        c.restore();
+      } else {
+        c.save(); c.translate(this.X+S/2, this.y+S/2); c.rotate(this.rot);
+        c.fillStyle = C.sun; c.fillRect(-S/2,-S/2,S,S);
+        c.strokeStyle = C.deep; c.lineWidth = 3; c.strokeRect(-S/2+1.5,-S/2+1.5,S-3,S-3);
+        c.fillStyle = C.teal; c.fillRect(-8,-8,16,16);
+        c.fillStyle = C.deep; c.fillRect(-5,-4,3,5); c.fillRect(2,-4,3,5);
+        c.restore();
+      }
     }
-    label(c, `INTENTO ${this.attempt}`, 14, 22, 10, '#fff', 'left');
-    label(c, `${this.score} m`, W-14, 22, 12, '#fff', 'right');
-    if (this.state==='ready') banner(c,W,H,'GEOMETRY DASH',['Toca o pulsa Espacio para saltar','Mantén pulsado para encadenar saltos'],'#ff5fa2');
-    if (this.state==='over' && this.t > .3) banner(c,W,H,'¡CRASH!',[`${this.score} metros en el intento ${this.attempt}`,'Toca o pulsa Espacio para reintentar'],C.coral);
+    if (this.flash > 0){ c.fillStyle = `rgba(255,255,255,${this.flash})`; c.fillRect(0,0,W,H) }
+    const pct = this.pct();
+    label(c, `NIVEL ${this.lvl}`, 14, 18, 10, '#fff', 'left');
+    c.font = PIX(7); c.fillStyle = 'rgba(255,255,255,.7)'; c.textAlign = 'left'; c.fillText(`INTENTO ${this.attempt}`, 14, 36);
+    c.fillStyle = 'rgba(0,0,0,.35)'; rr(c, 170, 12, 140, 10, 5);
+    c.fillStyle = C.sun; if (pct > 0) rr(c, 170, 12, 140*pct/100, 10, 5);
+    label(c, `${pct}%`, W-14, 18, 10, '#fff', 'right');
+    if (this.state==='ready') banner(c,W,H,`NIVEL ${this.lvl}`,['Toca o pulsa Espacio para empezar', this.max > 1 ? `‚óÄ ‚ñ∂ cambian de nivel (tienes ${this.max} desbloqueados)` : 'Supera el nivel para desbloquear el siguiente'],'#ff5fa2');
+    if (this.state==='over' && this.t > .3) banner(c,W,H,'¬°CRASH!',[`Has llegado al ${pct}% en el intento ${this.attempt}`,'Toca o pulsa Espacio para reintentar'],C.coral);
+    if (this.state==='win' && this.t > .3) banner(c,W,H,`¬°NIVEL ${this.lvl} SUPERADO!`,[`Lo has conseguido en ${plural(this.attempt,'intento')}`,'Toca para pasar al siguiente nivel'],C.sun);
   }
 };
 
 /* ---------- FLAPPY ---------- */
 const Flappy = {
   id:'flappy', name:'Flappy', w:360, h:540, color:C.sun, tapOnDown:true, thumbY:150,
-  desc:'Aletea entre las tuberías sin tocar nada. Parece fácil.', keys:'Espacio o toque',
+  desc:'Aletea entre las tuber√≠as. Cada 10 sube el nivel: m√°s r√°pido, m√°s estrecho y tuber√≠as que se mueven.', keys:'Espacio o toque',
   pad:[{a:'action', l:'Aletear', wide:true}],
-  hint:'<kbd>Espacio</kbd>, <kbd>↑</kbd>, clic o toque en la pantalla para aletear.',
-  GAP:150, PW:56,
-  reset(){ Object.assign(this,{y:240,v:0,pipes:[],spawn:.4,score:0,state:'ready',t:0,gx:0}) },
+  hint:'<kbd>Espacio</kbd>, <kbd>‚Üë</kbd>, clic o toque en la pantalla para aletear. Cada 10 tuber√≠as subes de nivel.',
+  PW:56,
+  reset(){ Object.assign(this,{y:240,v:0,pipes:[],spawn:.4,score:0,state:'ready',t:0,gx:0,time:0,lastL:1,lvlFlash:0}) },
   demo(){ this.reset(); this.state='play'; this.score=7; this.y=250; this.v=-120;
-    this.pipes=[{x:170,gy:150},{x:330,gy:210}] },
+    this.pipes=[{x:170,gy:150,gap:150,amp:0,ph:0},{x:330,gy:210,gap:150,amp:0,ph:0}] },
+  level(){ return 1 + Math.floor(this.score/10) },
+  gapY(p){ return p.gy + (p.amp ? Math.sin(this.time*1.6 + p.ph)*p.amp : 0) },
   input(a){
     if (!['action','tap','up'].includes(a)) return;
     if (this.state==='over'){ if (this.t > .6) this.reset(); return }
     this.state='play'; this.v=-360;
   },
   update(dt){
-    const G = this.h - 70;
-    if (this.state!=='over') this.gx = (this.gx + 150*dt) % 28;
+    const G = this.h - 70, L = this.level(), sp = 150 + (L-1)*12;
+    this.lvlFlash = Math.max(0, this.lvlFlash - dt);
+    if (this.state!=='over') this.gx = (this.gx + sp*dt) % 28;
     if (this.state==='ready'){ this.y = 240 + Math.sin(performance.now()/260)*8; return }
     this.v += 1300*dt; this.y += this.v*dt;
     if (this.state==='over'){ this.t += dt; if (this.y > G-14){ this.y = G-14; this.v = 0 } return }
+    this.time += dt;
     this.spawn -= dt;
-    if (this.spawn <= 0){ this.spawn = 1.45; this.pipes.push({x:this.w+10, gy:60 + Math.random()*(G-60-this.GAP-50), passed:false}) }
-    for (const p of this.pipes){ p.x -= 150*dt; if (!p.passed && p.x + this.PW < 90){ p.passed = true; this.score++ } }
+    if (this.spawn <= 0){
+      this.spawn = Math.max(1.1, 1.45 - (L-1)*.05);
+      const gap = Math.max(108, 150 - (L-1)*8), amp = L >= 3 ? Math.min(50, (L-2)*12) : 0;
+      this.pipes.push({x:this.w+10, gap, amp, ph:Math.random()*6, gy: 60 + amp + Math.random()*Math.max(10, G-110-gap-2*amp), passed:false});
+    }
+    for (const p of this.pipes){ p.x -= sp*dt; if (!p.passed && p.x + this.PW < 90){ p.passed = true; this.score++ } }
+    if (this.level() > this.lastL){ this.lastL = this.level(); this.lvlFlash = 1.4 }
     this.pipes = this.pipes.filter(p => p.x > -80);
     const r = 12;
     if (this.y + r > G || this.y - r < -40) return this.die();
-    for (const p of this.pipes)
-      if (90+r > p.x && 90-r < p.x+this.PW && (this.y-r < p.gy || this.y+r > p.gy+this.GAP)) return this.die();
+    for (const p of this.pipes){ const gy = this.gapY(p);
+      if (90+r > p.x && 90-r < p.x+this.PW && (this.y-r < gy || this.y+r > gy+p.gap)) return this.die() }
   },
   die(){ this.state='over'; this.t=0; this.v=Math.min(this.v,-150) },
   pipe(c, x, y, h, top){
@@ -291,7 +402,7 @@ const Flappy = {
     c.fillStyle = C.teal; c.fillRect(x-1, cy+3, this.PW+2, 16);
   },
   draw(c){
-    const W=this.w, G=this.h-70;
+    const W=this.w, G=this.h-70, L=this.level();
     const g = c.createLinearGradient(0,0,0,G); g.addColorStop(0,'#2b2370'); g.addColorStop(.65,'#7a3f8f'); g.addColorStop(1,'#ff9a76');
     c.fillStyle = g; c.fillRect(0,0,W,G);
     c.fillStyle = C.sun; c.globalAlpha=.9; c.beginPath(); c.arc(265,G-110,48,0,7); c.fill(); c.globalAlpha=1;
@@ -299,11 +410,11 @@ const Flappy = {
     for (let i=0;i<12;i++){ const bh = 40 + (i*53)%80; c.fillRect(i*32-4, G-bh, 30, bh) }
     c.fillStyle = '#ffcf3f55';
     for (let i=0;i<12;i++){ const bh = 40 + (i*53)%80; for (let k=12;k<bh-6;k+=14) if ((i+k)%3) c.fillRect(i*32+4, G-bh+k, 5, 6) }
-    for (const p of this.pipes){ this.pipe(c,p.x,0,p.gy,true); this.pipe(c,p.x,p.gy+this.GAP,G-p.gy-this.GAP,false) }
+    for (const p of this.pipes){ const gy = this.gapY(p); this.pipe(c,p.x,0,gy,true); this.pipe(c,p.x,gy+p.gap,G-gy-p.gap,false) }
     c.fillStyle = '#1d1940'; c.fillRect(0,G,W,70);
     c.fillStyle = C.teal; c.fillRect(0,G,W,8);
     c.fillStyle = C.panel2; for (let x=-this.gx; x<W; x+=28) c.fillRect(x, G+20, 14, 6);
-    // pájaro
+    // p√°jaro
     const ang = this.state==='ready' ? 0 : Math.max(-.5, Math.min(1.3, this.v/550));
     c.save(); c.translate(90,this.y); c.rotate(ang);
     c.fillStyle = C.sun; c.beginPath(); c.arc(0,0,15,0,7); c.fill();
@@ -314,9 +425,10 @@ const Flappy = {
     c.fillStyle = C.deep; c.beginPath(); c.arc(8,-5,3,0,7); c.fill();
     c.fillStyle = C.coral; c.beginPath(); c.moveTo(12,0); c.lineTo(24,3); c.lineTo(12,8); c.closePath(); c.fill();
     c.restore();
-    if (this.state!=='ready') label(c, String(this.score), W/2, 60, 32, '#fff');
-    if (this.state==='ready') banner(c,W,this.h,'FLAPPY',['Toca o pulsa Espacio para aletear','y pasa entre las tuberías'],C.sun);
-    if (this.state==='over') banner(c,W,this.h,'GAME OVER',[`Has pasado ${this.score} tubería${this.score===1?'':'s'}`,'Toca o pulsa Espacio para reintentar'],C.coral);
+    if (this.state!=='ready'){ label(c, String(this.score), W/2, 60, 32, '#fff'); label(c, `NIVEL ${L}`, 14, 22, 10, '#fff', 'left') }
+    if (this.lvlFlash > 0){ c.globalAlpha = clamp(this.lvlFlash, 0, 1); label(c, `¬°NIVEL ${L}!`, W/2, 120, 20, C.sun); c.globalAlpha = 1 }
+    if (this.state==='ready') banner(c,W,this.h,'FLAPPY',['Toca o pulsa Espacio para aletear','Cada 10 tuber√≠as subes de nivel'],C.sun);
+    if (this.state==='over') banner(c,W,this.h,'GAME OVER',[`${plural(this.score,'tuber√≠a')} ¬∑ nivel ${L}`,'Toca o pulsa Espacio para reintentar'],C.coral);
   }
 };
 
@@ -332,13 +444,13 @@ function block(c,x,y,s,col){
 }
 const Tetris = {
   id:'tetris', name:'Tetris', w:360, h:480, color:C.violet, repeatOK:true, thumbY:210,
-  desc:'Encaja las piezas y completa líneas. Cada 10 líneas sube el nivel.', keys:'Flechas y Espacio',
+  desc:'Encaja las piezas y completa l√≠neas. Cada 10 l√≠neas sube el nivel y las piezas caen m√°s r√°pido.', keys:'Flechas y Espacio',
   swipe:{down:'drop', up:'rot'},
-  pad:[{a:'left',l:'←',hold:1},{a:'rot',l:'↻'},{a:'right',l:'→',hold:1},{a:'down',l:'↓',hold:1},{a:'drop',l:'Soltar'}],
-  hint:'<kbd>← →</kbd> mover · <kbd>↑</kbd> girar · <kbd>↓</kbd> bajar · <kbd>Espacio</kbd> soltar. En móvil: toca para girar, desliza para mover.',
+  pad:[{a:'left',l:'‚Üê',hold:1},{a:'rot',l:'‚Üª'},{a:'right',l:'‚Üí',hold:1},{a:'down',l:'‚Üì',hold:1},{a:'drop',l:'Soltar'}],
+  hint:'<kbd>‚Üê ‚Üí</kbd> mover ¬∑ <kbd>‚Üë</kbd> girar ¬∑ <kbd>‚Üì</kbd> bajar ¬∑ <kbd>Espacio</kbd> soltar. En m√≥vil: toca para girar, desliza para mover.',
   reset(){
     this.board = [...Array(20)].map(() => Array(10).fill(null));
-    this.bag=[]; this.next=this.pick(); this.score=0; this.lines=0; this.level=1; this.state='ready'; this.acc=0;
+    this.bag=[]; this.next=this.pick(); this.score=0; this.lines=0; this.level=1; this.state='ready'; this.acc=0; this.lvlFlash=0;
     this.spawn();
   },
   demo(){
@@ -376,7 +488,10 @@ const Tetris = {
     }
     let cleared = 0;
     for (let r=19;r>=0;r--) if (this.board[r].every(v=>v)){ this.board.splice(r,1); this.board.unshift(Array(10).fill(null)); cleared++; r++ }
-    if (cleared){ this.lines += cleared; this.score += [0,100,300,500,800][cleared]*this.level; this.level = Math.floor(this.lines/10)+1 }
+    if (cleared){
+      this.lines += cleared; this.score += [0,100,300,500,800][cleared]*this.level;
+      const L = Math.floor(this.lines/10)+1; if (L > this.level){ this.level = L; this.lvlFlash = 1.5 }
+    }
     this.acc = 0; this.spawn();
   },
   input(a){
@@ -391,9 +506,10 @@ const Tetris = {
     }
   },
   update(dt){
+    this.lvlFlash = Math.max(0, this.lvlFlash - dt);
     if (this.state!=='play') return;
     this.acc += dt;
-    if (this.acc >= Math.max(.07, .8 - (this.level-1)*.07)){
+    if (this.acc >= Math.max(.06, .8 - (this.level-1)*.07)){
       this.acc = 0;
       if (!this.hit(this.p.m,this.p.x,this.p.y+1)) this.p.y++; else this.lock();
     }
@@ -423,34 +539,50 @@ const Tetris = {
     const nm = SH[this.next], ns = 16;
     const nw = nm[0].length*ns, nh = nm.filter(r=>r.some(v=>v)).length*ns, off = nm.findIndex(r=>r.some(v=>v));
     nm.forEach((r,ry) => r.forEach((v,rx) => v && block(c, px-nw/2+rx*ns, 76-nh/2+(ry-off)*ns, ns, TC[this.next])));
-    [['NIVEL',this.level],['LINEAS',this.lines]].forEach(([k,v],i) => {
+    [['NIVEL',this.level],['LINEAS',this.lines],['FALTAN',10 - this.lines%10]].forEach(([k,v],i) => {
       c.font = PIX(8); c.fillStyle = C.muted; c.fillText(k, px, 150+i*70);
       label(c, String(v), px, 176+i*70, 18, C.ink);
     });
+    if (this.lvlFlash > 0){ c.globalAlpha = clamp(this.lvlFlash,0,1); label(c, `¬°NIVEL ${this.level}!`, 120, 200, 16, C.sun); c.globalAlpha = 1 }
     if (this.state==='ready') banner(c,240,480,'TETRIS',['Toca o pulsa una','tecla para empezar'],C.violet);
-    if (this.state==='over') banner(c,240,480,'GAME OVER',[`${this.score} puntos`,`${this.lines} línea${this.lines===1?'':'s'}`,'Toca o Espacio: otra'],C.coral);
+    if (this.state==='over') banner(c,240,480,'GAME OVER',[`${this.score} puntos`,`Nivel ${this.level}`,'Toca o Espacio: otra'],C.coral);
   }
 };
 
 /* ---------- SERPIENTE ---------- */
+// Obst√°culos de cada nivel como rect√°ngulos [x, y, ancho, alto]; la fila 9 queda libre a la izquierda para la salida
+const SNAKE_MAPS = [
+  [],
+  [[3,3,4,1],[11,3,4,1],[3,14,4,1],[11,14,4,1]],
+  [[9,1,1,6],[9,12,1,5],[2,5,5,1],[12,13,5,1]],
+  [[1,1,6,1],[11,1,6,1],[1,16,6,1],[11,16,6,1],[1,2,1,5],[1,11,1,5],[16,2,1,5],[16,11,1,5]],
+  [[4,4,2,2],[12,4,2,2],[4,12,2,2],[12,12,2,2],[8,6,2,2],[8,12,2,2]],
+  [[3,6,12,1],[3,12,12,1],[14,7,1,2],[3,13,1,2]]
+];
 const Snake = {
   id:'snake', name:'Serpiente', w:360, h:360, color:C.teal, thumbY:45, N:18, S:20,
-  desc:'Come manzanas, crece y no te muerdas la cola.', keys:'Flechas o deslizar',
-  pad:[{a:'up',l:'↑',area:'up'},{a:'left',l:'←',area:'left'},{a:'down',l:'↓',area:'down'},{a:'right',l:'→',area:'right'}], dpad:true,
-  hint:'<kbd>Flechas</kbd> o <kbd>WASD</kbd> para girar. En móvil, desliza sobre la pantalla.',
-  reset(){
-    this.s=[{x:7,y:9},{x:6,y:9},{x:5,y:9}]; this.dir={x:1,y:0}; this.q=[]; this.score=0; this.eaten=0;
-    this.state='ready'; this.acc=0; this.food=this.place();
+  desc:'Come manzanas y crece. Cada nivel trae un mapa nuevo con muros y m√°s velocidad.', keys:'Flechas o deslizar',
+  pad:[{a:'up',l:'‚Üë',area:'up'},{a:'left',l:'‚Üê',area:'left'},{a:'down',l:'‚Üì',area:'down'},{a:'right',l:'‚Üí',area:'right'}], dpad:true,
+  hint:'<kbd>Flechas</kbd> o <kbd>WASD</kbd> para girar. En m√≥vil, desliza sobre la pantalla. Come las manzanas que pide cada nivel para pasar al siguiente mapa.',
+  reset(){ this.score = 0; this.eaten = 0; this.start(1); this.state = 'ready' },
+  start(L){
+    this.L = L; this.need = 5 + Math.floor(L/3); this.got = 0;
+    this.walls = new Set();
+    SNAKE_MAPS[(L-1) % SNAKE_MAPS.length].forEach(([x,y,w,h]) => { for (let i=0;i<w;i++) for (let j=0;j<h;j++) this.walls.add((x+i)+','+(y+j)) });
+    this.s = [{x:5,y:9},{x:4,y:9},{x:3,y:9}]; this.dir = {x:1,y:0}; this.q = []; this.acc = 0;
+    this.food = this.place(); this.state = 'play'; this.t = 0;
   },
   demo(){
-    this.reset(); this.state='play';
+    this.reset(); this.start(2); this.score = 120;
     this.s=[[10,6],[9,6],[8,6],[7,6],[6,6],[5,6],[5,7],[5,8],[5,9],[6,9],[7,9],[8,9],[9,9],[10,9],[11,9],[12,9],[12,10],[12,11]].map(([x,y])=>({x,y}));
     this.food={x:13,y:6};
   },
-  place(){ let p; do { p={x:Math.random()*this.N|0, y:Math.random()*this.N|0} } while (this.s.some(q=>q.x===p.x&&q.y===p.y)); return p },
+  blocked(p){ return this.walls.has(p.x+','+p.y) },
+  place(){ let p; do { p={x:Math.random()*this.N|0, y:Math.random()*this.N|0} } while (this.blocked(p) || this.s.some(q=>q.x===p.x&&q.y===p.y)); return p },
   input(a){
     const D = {left:[-1,0],right:[1,0],up:[0,-1],down:[0,1]}[a];
     if (this.state==='over'){ if (a==='action'||a==='tap') this.reset(); return }
+    if (this.state==='next'){ if (this.t > .4 && (D || a==='action' || a==='tap')) this.start(this.L+1); return }
     if (this.state==='ready' && (D || a==='action' || a==='tap')) this.state='play';
     if (!D) return;
     const last = this.q.length ? this.q[this.q.length-1] : this.dir;
@@ -458,22 +590,28 @@ const Snake = {
     if (this.q.length < 3) this.q.push({x:D[0], y:D[1]});
   },
   update(dt){
+    if (this.state==='next'){ this.t += dt; if (this.t > 1.6) this.start(this.L+1); return }
     if (this.state!=='play') return;
     this.acc += dt;
-    const iv = Math.max(.06, .13 - this.eaten*.0025);
+    const iv = Math.max(.055, .14 - (this.L-1)*.008 - this.got*.002);
     if (this.acc < iv) return;
     this.acc = 0;
     if (this.q.length) this.dir = this.q.shift();
     const h = {x:this.s[0].x+this.dir.x, y:this.s[0].y+this.dir.y};
     const eat = h.x===this.food.x && h.y===this.food.y;
     const body = eat ? this.s : this.s.slice(0,-1);
-    if (h.x<0||h.y<0||h.x>=this.N||h.y>=this.N||body.some(p=>p.x===h.x&&p.y===h.y)){ this.state='over'; return }
+    if (h.x<0||h.y<0||h.x>=this.N||h.y>=this.N||this.blocked(h)||body.some(p=>p.x===h.x&&p.y===h.y)){ this.state='over'; return }
     this.s.unshift(h);
-    if (eat){ this.eaten++; this.score+=10; if (this.s.length < this.N*this.N) this.food=this.place() } else this.s.pop();
+    if (eat){
+      this.eaten++; this.got++; this.score += 10*this.L;
+      if (this.got >= this.need){ this.state = 'next'; this.t = 0; return }
+      this.food = this.place();
+    } else this.s.pop();
   },
   draw(c){
     const S=this.S;
     for (let y=0;y<this.N;y++) for (let x=0;x<this.N;x++){ c.fillStyle = (x+y)%2 ? '#1b1740' : '#1f1a49'; c.fillRect(x*S,y*S,S,S) }
+    for (const k of this.walls){ const [x,y] = k.split(',').map(Number); c.fillStyle = C.line; c.fillRect(x*S, y*S, S, S); c.fillStyle = '#5a4fa8'; c.fillRect(x*S+2, y*S+2, S-4, 4) }
     const f=this.food, fx=f.x*S+S/2, fy=f.y*S+S/2;
     c.fillStyle = C.coral; c.beginPath(); c.arc(fx,fy+1,7.5,0,7); c.fill();
     c.fillStyle = '#ffb3a8'; c.beginPath(); c.arc(fx-3,fy-2,2,0,7); c.fill();
@@ -490,14 +628,18 @@ const Snake = {
       c.fillStyle='#fff'; c.beginPath(); c.arc(ex,ey,3,0,7); c.fill();
       c.fillStyle=C.deep; c.beginPath(); c.arc(ex+d.x,ey+d.y,1.6,0,7); c.fill();
     });
-    if (this.state==='ready') banner(c,this.w,this.h,'SERPIENTE',['Pulsa una flecha o desliza','para empezar a moverte'],C.teal);
-    if (this.state==='over') banner(c,this.w,this.h,'GAME OVER',[`Te has comido ${this.eaten} manzana${this.eaten===1?'':'s'}`,'Toca o pulsa Espacio para reintentar'],C.coral);
+    label(c, `NIVEL ${this.L}`, 8, 12, 8, C.ink, 'left');
+    label(c, `${this.got}/${this.need}`, this.w-8, 12, 8, C.coral, 'right');
+    if (this.state==='ready') banner(c,this.w,this.h,'SERPIENTE',[`Come ${this.need} manzanas para pasar de nivel`,'Pulsa una flecha o desliza para empezar'],C.teal);
+    if (this.state==='next') banner(c,this.w,this.h,`¬°NIVEL ${this.L+1}!`,['Nuevo mapa y m√°s velocidad','Prep√°rate‚Ä¶'],C.sun);
+    if (this.state==='over') banner(c,this.w,this.h,'GAME OVER',[`Nivel ${this.L} ¬∑ ${plural(this.eaten,'manzana')}`,'Toca o pulsa Espacio para reintentar'],C.coral);
   }
 };
 
 /* ---------- 2048 ---------- */
 const TILE = {2:['#3a3373',C.ink],4:['#4a3f8f',C.ink],8:[C.teal,C.deep],16:['#2bb3a9',C.deep],32:[C.sun,C.deep],64:['#ffb02e',C.deep],
   128:['#ff8f5a',C.deep],256:[C.coral,C.deep],512:['#e8507a',C.ink],1024:[C.violet,C.ink],2048:['#ffffff',C.deep]};
+const GOALS = [128,256,512,1024,2048,4096,8192,16384,32768];
 function slide(row){
   const a = row.filter(v=>v), out=[]; let gain=0;
   for (let i=0;i<a.length;i++){ if (a[i]===a[i+1]){ out.push(a[i]*2); gain+=a[i]*2; i++ } else out.push(a[i]) }
@@ -505,12 +647,12 @@ function slide(row){
   return [out,gain];
 }
 const G2048 = {
-  id:'2048', name:'2048', w:360, h:360, color:C.coral, thumbY:45,
-  desc:'Desliza y junta números iguales hasta llegar a 2048.', keys:'Flechas o deslizar',
-  pad:[{a:'up',l:'↑',area:'up'},{a:'left',l:'←',area:'left'},{a:'down',l:'↓',area:'down'},{a:'right',l:'→',area:'right'}], dpad:true,
-  hint:'<kbd>Flechas</kbd> o <kbd>WASD</kbd> para deslizar todas las fichas. Dos fichas iguales se suman al chocar.',
-  reset(){ this.g=[...Array(4)].map(()=>Array(4).fill(0)); this.score=0; this.state='play'; this.won=false; this.born=[]; this.add(); this.add() },
-  demo(){ this.reset(); this.g=[[2,4,8,16],[0,2,32,64],[0,0,128,256],[0,4,512,1024]]; this.born=[] },
+  id:'2048', name:'2048', w:360, h:400, color:C.coral, thumbY:85, OY:40,
+  desc:'Junta n√∫meros iguales. Cada nivel te pide una ficha m√°s grande: 128, 256, 512‚Ä¶ hasta 2048 y m√°s all√°.', keys:'Flechas o deslizar',
+  pad:[{a:'up',l:'‚Üë',area:'up'},{a:'left',l:'‚Üê',area:'left'},{a:'down',l:'‚Üì',area:'down'},{a:'right',l:'‚Üí',area:'right'}], dpad:true,
+  hint:'<kbd>Flechas</kbd> o <kbd>WASD</kbd> para deslizar todas las fichas. Dos fichas iguales se suman al chocar. Forma la ficha objetivo para subir de nivel.',
+  reset(){ this.g=[...Array(4)].map(()=>Array(4).fill(0)); this.score=0; this.state='play'; this.L=1; this.born=[]; this.add(); this.add() },
+  demo(){ this.reset(); this.L=5; this.g=[[2,4,8,16],[0,2,32,64],[0,0,128,256],[0,4,512,1024]]; this.born=[] },
   add(){
     const e=[]; for (let r=0;r<4;r++) for (let c=0;c<4;c++) if (!this.g[r][c]) e.push([r,c]);
     if (!e.length) return;
@@ -539,15 +681,18 @@ const G2048 = {
     }
     if (!moved) return;
     this.born=[]; this.add();
-    if (!this.won && g.flat().includes(2048)){ this.won=true; this.state='won' }
+    const top = Math.max(...g.flat());
+    if (top >= GOALS[this.L-1]){ this.reached = GOALS[this.L-1]; while (top >= GOALS[this.L-1]) this.L++; this.state='won' }
     else if (!this.canMove()) this.state='over';
   },
   update(){},
   draw(c){
     c.fillStyle = C.panel; c.fillRect(0,0,this.w,this.h);
+    label(c, `NIVEL ${this.L}`, 12, 22, 10, C.ink, 'left');
+    label(c, `OBJETIVO ${GOALS[this.L-1]}`, this.w-12, 22, 10, C.sun, 'right');
     const P=12, Gp=10, T=(this.w-P*2-Gp*3)/4, now=performance.now();
     for (let r=0;r<4;r++) for (let col=0;col<4;col++){
-      const x=P+col*(T+Gp), y=P+r*(T+Gp), v=this.g[r][col];
+      const x=P+col*(T+Gp), y=this.OY+P/2+r*(T+Gp), v=this.g[r][col];
       c.fillStyle = '#1b1740'; rr(c,x,y,T,T,10);
       if (!v) continue;
       const b = this.born.find(o=>o.r===r&&o.c===col);
@@ -558,8 +703,8 @@ const G2048 = {
       c.font = PIX([0,22,20,16,13,11][Math.min(5,digits)]*k); c.fillStyle = fg; c.textAlign='center'; c.textBaseline='middle';
       c.fillText(String(v), x+T/2+1, y+T/2+2);
     }
-    if (this.state==='won') banner(c,this.w,this.h,'¡2048!',['Lo has conseguido','Toca o Espacio para seguir'],C.sun);
-    if (this.state==='over') banner(c,this.w,this.h,'SIN MOVIMIENTOS',[`${this.score} puntos`,'Toca o pulsa Espacio para reintentar'],C.coral);
+    if (this.state==='won') banner(c,this.w,this.h,`¬°NIVEL ${this.L}!`,[`Has formado la ficha ${this.reached}`,`Siguiente objetivo: ${GOALS[this.L-1]}`,'Toca o pulsa Espacio para seguir'],C.sun);
+    if (this.state==='over') banner(c,this.w,this.h,'SIN MOVIMIENTOS',[`${this.score} puntos ¬∑ nivel ${this.L}`,'Toca o pulsa Espacio para reintentar'],C.coral);
   }
 };
 
@@ -568,54 +713,79 @@ const ALIEN = [['0011100','0111110','1101011','1111111','0101010','1000001'],['0
 const AC = [C.coral,'#ff9f43',C.sun,'#6be37a',C.teal];
 const Invaders = {
   id:'invaders', name:'Invasores', w:360, h:480, color:'#6be37a', thumbY:40, noSwipe:true,
-  desc:'Defiende la Tierra de oleadas de marcianos que bajan cada vez más rápido.', keys:'Flechas y Espacio',
-  pad:[{a:'left',l:'←',held:1},{a:'action',l:'Disparar',held:1},{a:'right',l:'→',held:1}],
-  hint:'<kbd>← →</kbd> para moverte y <kbd>Espacio</kbd> para disparar. Con ratón o dedo: arrastra para moverte y mantén pulsado para disparar.',
-  reset(){ Object.assign(this,{sx:165,lives:3,score:0,wave:1,state:'ready',shots:[],bombs:[],cool:0,inv:0,boom:[]}); this.spawnWave() },
+  desc:'Defiende la Tierra tras tus escudos. Cada nivel los marcianos bajan m√°s r√°pido y disparan m√°s.', keys:'Flechas y Espacio',
+  pad:[{a:'left',l:'‚Üê',held:1},{a:'action',l:'Disparar',held:1},{a:'right',l:'‚Üí',held:1}],
+  hint:'<kbd>‚Üê ‚Üí</kbd> para moverte y <kbd>Espacio</kbd> para disparar. Con rat√≥n o dedo: arrastra para moverte y mant√©n pulsado para disparar. Desde el nivel 2 pasa un platillo que da puntos extra.',
+  reset(){ Object.assign(this,{sx:165,lives:3,score:0,wave:1,state:'ready',shots:[],bombs:[],cool:0,inv:0,boom:[],pops:[],ufo:null,ufoT:14,lvlFlash:0}); this.spawnWave() },
   spawnWave(){
     this.al = [];
     for (let r=0;r<5;r++) for (let c=0;c<8;c++) this.al.push({x:28+c*36, y:70+r*30+Math.min(60,(this.wave-1)*12), r});
     this.dir = 1; this.stepT = 0; this.frame = 0;
+    this.bk = [];
+    for (let b=0;b<4;b++) for (let r=0;r<8;r++) for (let c=0;c<11;c++){
+      if ((r===0 && (c<2 || c>8)) || (r>5 && c>3 && c<7)) continue;
+      this.bk.push({x:30+b*85+c*4, y:372+r*4});
+    }
   },
   demo(){
-    this.reset(); this.state='play'; this.score=340;
+    this.reset(); this.state='play'; this.score=340; this.wave=2;
     this.al = this.al.filter((a,i) => ![3,10,11,20,26,33].includes(i));
-    this.shots = [{x:180,y:330}]; this.bombs = [{x:110,y:380}]; this.sx = 165;
+    this.shots = [{x:180,y:330}]; this.bombs = [{x:110,y:340}]; this.sx = 165; this.ufo = {x:250, dir:-1};
   },
   input(a){
     if (this.state==='over'){ if (a==='action'||a==='tap'){ this.reset(); this.state='play' } return }
     if (this.state==='ready') this.state='play';
   },
   drag(x,y,down){ this.sx = clamp(x-15, 6, this.w-36); if (down && this.state==='ready') this.state='play' },
+  hitBunker(x, y, h){
+    const i = this.bk.findIndex(k => x >= k.x-1 && x <= k.x+5 && y <= k.y+4 && y+h >= k.y);
+    if (i < 0) return false;
+    this.bk.splice(i,1); return true;
+  },
   update(dt){
     for (const b of this.boom) b.t -= dt;
     this.boom = this.boom.filter(b => b.t > 0);
+    for (const p of this.pops){ p.t -= dt; p.y -= 30*dt }
+    this.pops = this.pops.filter(p => p.t > 0);
+    this.lvlFlash = Math.max(0, this.lvlFlash - dt);
     if (this.state!=='play') return;
     if (held.has('left')) this.sx -= 220*dt;
     if (held.has('right')) this.sx += 220*dt;
     this.sx = clamp(this.sx, 6, this.w-36);
     this.cool -= dt; this.inv = Math.max(0, this.inv-dt);
     if ((held.has('action') || held.has('ptr')) && this.cool <= 0 && this.shots.length < 2){ this.shots.push({x:this.sx+15, y:432}); this.cool = .3 }
-    for (const s of this.shots) s.y -= 440*dt;
-    for (const b of this.bombs) b.y += (200 + this.wave*15)*dt;
+    for (const s of this.shots){ s.y -= 440*dt; if (this.hitBunker(s.x, s.y, 10)) s.y = -99 }
+    for (const b of this.bombs){ b.y += (200 + this.wave*15)*dt; if (this.hitBunker(b.x, b.y, 9)) b.y = 999 }
     this.bombs = this.bombs.filter(b => b.y < this.h);
     this.stepT -= dt;
     if (this.stepT <= 0){
-      this.stepT = Math.max(.06, .55 - (40-this.al.length)*.012 - (this.wave-1)*.05);
+      this.stepT = Math.max(.05, .55 - (40-this.al.length)*.012 - (this.wave-1)*.05);
       this.frame ^= 1;
       const edge = this.al.some(a => (this.dir>0 && a.x+29 > this.w-8) || (this.dir<0 && a.x-8 < 8));
       if (edge){ this.dir *= -1; this.al.forEach(a => a.y += 14) } else this.al.forEach(a => a.x += 8*this.dir);
+      for (const a of this.al) this.bk = this.bk.filter(k => !(k.x+4 > a.x && k.x < a.x+21 && k.y+4 > a.y && k.y < a.y+18));
     }
-    if (this.al.length && Math.random() < dt*(.8 + this.wave*.3)){
+    if (this.al.length && Math.random() < dt*(.8 + this.wave*.35)){
       const cols = {};
       this.al.forEach(a => { const k = Math.round(a.x); if (!cols[k] || cols[k].y < a.y) cols[k] = a });
       const sh = Object.values(cols), s = sh[Math.random()*sh.length|0];
       this.bombs.push({x:s.x+10, y:s.y+18});
     }
-    for (const s of this.shots) for (const a of this.al)
-      if (!a.dead && s.y > -10 && s.x > a.x-1 && s.x < a.x+22 && s.y > a.y && s.y < a.y+18){
-        a.dead = 1; s.y = -99; this.score += (5-a.r)*10; this.boom.push({x:a.x+10, y:a.y+9, t:.25, col:AC[a.r]});
+    if (this.wave >= 2){
+      if (!this.ufo){ this.ufoT -= dt; if (this.ufoT <= 0){ const d = Math.random()<.5 ? 1 : -1; this.ufo = {x: d>0 ? -40 : this.w+4, dir:d} } }
+      else { this.ufo.x += this.ufo.dir*90*dt; if (this.ufo.x < -50 || this.ufo.x > this.w+50){ this.ufo = null; this.ufoT = 12 + Math.random()*8 } }
+    }
+    for (const s of this.shots){
+      if (s.y < -10) continue;
+      if (this.ufo && s.x > this.ufo.x && s.x < this.ufo.x+36 && s.y < 62 && s.y > 40){
+        const pts = [50,100,150,300][Math.random()*4|0]; this.score += pts; this.pops.push({x:this.ufo.x+18, y:50, t:1, txt:'+'+pts});
+        this.boom.push({x:this.ufo.x+18, y:52, t:.4, col:C.violet}); this.ufo = null; this.ufoT = 12 + Math.random()*8; s.y = -99; continue;
       }
+      for (const a of this.al)
+        if (!a.dead && s.x > a.x-1 && s.x < a.x+22 && s.y > a.y && s.y < a.y+18){
+          a.dead = 1; s.y = -99; this.score += (5-a.r)*10*this.wave; this.boom.push({x:a.x+10, y:a.y+9, t:.25, col:AC[a.r]}); break;
+        }
+    }
     this.al = this.al.filter(a => !a.dead); this.shots = this.shots.filter(s => s.y > -10);
     for (const b of this.bombs)
       if (this.inv <= 0 && b.x > this.sx && b.x < this.sx+30 && b.y > 432 && b.y < 454){
@@ -623,7 +793,7 @@ const Invaders = {
         if (this.lives <= 0) this.state = 'over';
       }
     if (this.al.some(a => a.y+18 >= 428)) this.state = 'over';
-    if (!this.al.length){ this.wave++; this.spawnWave(); this.bombs = []; this.shots = [] }
+    if (!this.al.length){ this.wave++; this.spawnWave(); this.bombs = []; this.shots = []; this.lvlFlash = 1.6; if (this.lives < 5 && this.wave % 3 === 0) this.lives++ }
   },
   draw(c){
     const W=this.w, H=this.h;
@@ -635,37 +805,60 @@ const Invaders = {
       c.fillStyle = AC[a.r];
       map.forEach((row,ry) => [...row].forEach((v,rx) => v==='1' && c.fillRect(a.x+rx*3, a.y+ry*3, 3, 3)));
     }
-    for (const b of this.boom){ c.globalAlpha = clamp(b.t*3,0,1); c.strokeStyle = b.col; c.lineWidth = 3; c.beginPath(); c.arc(b.x, b.y, 18-b.t*30, 0, 7); c.stroke() }
+    if (this.ufo){
+      const u = this.ufo;
+      c.fillStyle = C.violet; c.beginPath(); c.ellipse(u.x+18, 54, 18, 6, 0, 0, 7); c.fill();
+      c.fillStyle = '#e8c4ff'; c.beginPath(); c.ellipse(u.x+18, 49, 8, 6, 0, Math.PI, 0); c.fill();
+      c.fillStyle = C.sun; for (let k=0;k<3;k++) c.fillRect(u.x+8+k*9, 54, 3, 2);
+    }
+    c.fillStyle = '#6be37a'; for (const k of this.bk) c.fillRect(k.x, k.y, 4, 4);
+    for (const b of this.boom){ c.globalAlpha = clamp(b.t*3,0,1); c.strokeStyle = b.col; c.lineWidth = 3; c.beginPath(); c.arc(b.x, b.y, Math.max(1, 18-b.t*30), 0, 7); c.stroke() }
     c.globalAlpha = 1;
     if (this.state!=='over' && !(this.inv > 0 && Math.floor(this.inv*10)%2)){
-      c.fillStyle = '#6be37a'; c.fillRect(this.sx, 444, 30, 8); c.fillRect(this.sx+4, 438, 22, 6); c.fillRect(this.sx+13, 430, 4, 8);
+      c.fillStyle = C.teal; c.fillRect(this.sx, 444, 30, 8); c.fillRect(this.sx+4, 438, 22, 6); c.fillRect(this.sx+13, 430, 4, 8);
     }
     c.fillStyle = '#fff'; for (const s of this.shots) c.fillRect(s.x-1, s.y, 2, 10);
     c.fillStyle = C.coral; for (const b of this.bombs) c.fillRect(b.x-1.5, b.y, 3, 9);
     c.fillStyle = '#6be37a55'; c.fillRect(0, 458, W, 2);
+    for (const p of this.pops){ c.globalAlpha = clamp(p.t,0,1); label(c, p.txt, p.x, p.y, 10, C.violet) }
+    c.globalAlpha = 1;
     label(c, `VIDAS ${this.lives}`, 12, 24, 10, C.ink, 'left');
-    label(c, `OLEADA ${this.wave}`, W-12, 24, 10, C.ink, 'right');
-    if (this.state==='ready') banner(c,W,H,'INVASORES',['Muévete con ← → y dispara con Espacio','o arrastra y mantén pulsado'],'#6be37a');
-    if (this.state==='over') banner(c,W,H,'INVASIÓN',[`${this.score} puntos · oleada ${this.wave}`,'Toca o pulsa Espacio para reintentar'],C.coral);
+    label(c, `NIVEL ${this.wave}`, W-12, 24, 10, C.ink, 'right');
+    if (this.lvlFlash > 0){ c.globalAlpha = clamp(this.lvlFlash,0,1); label(c, `¬°NIVEL ${this.wave}!`, W/2, 250, 18, C.sun); c.globalAlpha = 1 }
+    if (this.state==='ready') banner(c,W,H,'INVASORES',['Mu√©vete con ‚Üê ‚Üí y dispara con Espacio','o arrastra y mant√©n pulsado'],'#6be37a');
+    if (this.state==='over') banner(c,W,H,'INVASI√ìN',[`${this.score} puntos ¬∑ nivel ${this.wave}`,'Toca o pulsa Espacio para reintentar'],C.coral);
   }
 };
 
 /* ---------- ROMPELADRILLOS ---------- */
+// 1 = ladrillo normal, 2 = resistente (dos golpes), # = irrompible
+const BRICKS = [
+  ['11111111','11111111','11111111','11111111','11111111','11111111'],
+  ['...11...','..1111..','.112211.','11222211','11111111'],
+  ['1.1.1.1.','.2.2.2.2','1.1.1.1.','.2.2.2.2','1.1.1.1.','.1.1.1.1'],
+  ['22222222','1#1111#1','11111111','1#1221#1','11111111','##1..1##'],
+  ['..2..2..','.222222.','22222222','22222222','.222222.','..2222..','...22...'],
+  ['22222222','#.#.#.#.','11111111','.#.#.#.#','22222222','11111111']
+];
+const BCOL = [C.coral,'#ff9f43',C.sun,'#6be37a',C.teal,'#5b7cff',C.violet];
 const Breakout = {
   id:'breakout', name:'Rompeladrillos', w:360, h:480, color:'#ff9f43', thumbY:30, noSwipe:true, PW:70, PY:440,
-  desc:'Rebota la bola con la pala y rompe todos los ladrillos sin dejarla caer.', keys:'Flechas o ratón',
-  pad:[{a:'left',l:'←',held:1},{a:'action',l:'Lanzar'},{a:'right',l:'→',held:1}],
-  hint:'<kbd>← →</kbd>, el ratón o el dedo para mover la pala. <kbd>Espacio</kbd> o toque para lanzar la bola.',
+  desc:'Rompe todos los ladrillos. Cada nivel tiene un dibujo nuevo, ladrillos duros e irrompibles.', keys:'Flechas o rat√≥n',
+  pad:[{a:'left',l:'‚Üê',held:1},{a:'action',l:'Lanzar'},{a:'right',l:'‚Üí',held:1}],
+  hint:'<kbd>‚Üê ‚Üí</kbd>, el rat√≥n o el dedo para mover la pala. <kbd>Espacio</kbd> o toque para lanzar la bola. Los ladrillos con borde blanco necesitan dos golpes y los grises no se rompen.',
   reset(){ Object.assign(this,{px:145,lives:3,score:0,level:1,state:'ready'}); this.build(); this.stick() },
   build(){
-    this.bricks = []; const bw = (this.w-20)/8, cols = [C.coral,'#ff9f43',C.sun,'#6be37a',C.teal,'#5b7cff'];
-    for (let r=0;r<6;r++) for (let c=0;c<8;c++) this.bricks.push({x:10+c*bw, y:60+r*20, w:bw, h:20, col:cols[r], pts:(6-r)*10});
+    this.bricks = []; const bw = (this.w-20)/8, map = BRICKS[(this.level-1) % BRICKS.length];
+    map.forEach((row,r) => [...row].forEach((ch,c) => {
+      if (ch==='.') return;
+      this.bricks.push({x:10+c*bw, y:60+r*20, w:bw, h:20, col:ch==='#' ? '#6b6a8a' : BCOL[r % BCOL.length], hp:ch==='#' ? Infinity : +ch, pts:(8-r)*10});
+    }));
   },
   stick(){ this.stuck = true; this.bx = this.px+this.PW/2; this.by = this.PY-7; this.vx = 0; this.vy = 0 },
-  launch(){ const sp = 290 + this.level*25, a = Math.random()*.6-.3; this.vx = sp*Math.sin(a); this.vy = -sp*Math.cos(a); this.stuck = false },
+  launch(){ const sp = Math.min(520, 290 + this.level*25), a = Math.random()*.6-.3; this.vx = sp*Math.sin(a); this.vy = -sp*Math.cos(a); this.stuck = false },
   demo(){
-    this.reset(); this.state='play'; this.score=230;
-    this.bricks = this.bricks.filter((b,i) => ![2,3,4,11,12,19,27,35].includes(i));
+    this.reset(); this.level = 4; this.build(); this.state='play'; this.score=1230;
+    this.bricks = this.bricks.filter((b,i) => ![2,3,12,13,20,27].includes(i));
     this.stuck = false; this.bx = 205; this.by = 300; this.px = 120;
   },
   input(a){
@@ -689,18 +882,19 @@ const Breakout = {
     if (this.bx > this.w-R){ this.bx = this.w-R; this.vx = -Math.abs(this.vx) }
     if (this.by < R+36){ this.by = R+36; this.vy = Math.abs(this.vy) }
     if (this.vy > 0 && this.by+R >= this.PY && this.by-R <= this.PY+10 && this.bx >= this.px-R && this.bx <= this.px+this.PW+R){
-      const rel = clamp((this.bx-(this.px+this.PW/2))/(this.PW/2), -1, 1), sp = Math.min(560, Math.hypot(this.vx,this.vy)*1.01), a = rel*1.05;
+      const rel = clamp((this.bx-(this.px+this.PW/2))/(this.PW/2), -1, 1), sp = Math.min(580, Math.hypot(this.vx,this.vy)*1.01), a = rel*1.05;
       this.vx = sp*Math.sin(a); this.vy = -sp*Math.cos(a); this.by = this.PY-R;
     }
     for (let k=0;k<this.bricks.length;k++){
       const b = this.bricks[k];
       if (this.bx+R > b.x && this.bx-R < b.x+b.w && this.by+R > b.y && this.by-R < b.y+b.h){
         const ox = Math.min(this.bx+R-b.x, b.x+b.w-(this.bx-R)), oy = Math.min(this.by+R-b.y, b.y+b.h-(this.by-R));
-        if (ox < oy) this.vx = -this.vx; else this.vy = -this.vy;
-        this.bricks.splice(k,1); this.score += b.pts*this.level; break;
+        if (ox < oy){ this.vx = -this.vx; this.bx += this.vx > 0 ? ox : -ox } else { this.vy = -this.vy; this.by += this.vy > 0 ? oy : -oy }
+        if (b.hp !== Infinity){ b.hp--; if (b.hp <= 0){ this.bricks.splice(k,1); this.score += b.pts*this.level } }
+        break;
       }
     }
-    if (!this.bricks.length){ this.level++; this.build(); this.stick(); return true }
+    if (!this.bricks.some(b => b.hp !== Infinity)){ this.level++; this.build(); this.stick(); this.lvlFlash = 1.6; return true }
     if (this.by > this.h+10){ this.lives--; if (this.lives <= 0) this.state = 'over'; else this.stick(); return true }
     return false;
   },
@@ -712,37 +906,44 @@ const Breakout = {
     label(c, `NIVEL ${this.level}`, W-12, 18, 10, C.ink, 'right');
     for (const b of this.bricks){
       c.fillStyle = b.col; rr(c, b.x+2, b.y+2, b.w-4, b.h-4, 4);
-      c.fillStyle = 'rgba(255,255,255,.28)'; c.fillRect(b.x+5, b.y+4, b.w-10, 3);
+      if (b.hp === Infinity){ c.fillStyle = 'rgba(0,0,0,.25)'; for (let k=6;k<b.w-4;k+=8) c.fillRect(b.x+k, b.y+4, 3, b.h-8) }
+      else { c.fillStyle = 'rgba(255,255,255,.28)'; c.fillRect(b.x+5, b.y+4, b.w-10, 3) }
+      if (b.hp === 2){ c.strokeStyle = '#fff'; c.lineWidth = 2; c.strokeRect(b.x+3, b.y+3, b.w-6, b.h-6) }
     }
     c.fillStyle = '#ff9f43'; rr(c, this.px, this.PY, this.PW, 10, 5);
     c.fillStyle = '#fff'; c.beginPath(); c.arc(this.bx, this.by, 6, 0, 7); c.fill();
-    if (this.stuck && this.state==='play'){ c.font = BODY(13); c.fillStyle = C.muted; c.textAlign = 'center'; c.fillText('Toca o pulsa Espacio para lanzar', W/2, 470) }
-    if (this.state==='ready') banner(c,W,H,'ROMPELADRILLOS',['Mueve la pala con ← → o el ratón','Toca o pulsa Espacio para lanzar'],'#ff9f43');
-    if (this.state==='over') banner(c,W,H,'GAME OVER',[`${this.score} puntos · nivel ${this.level}`,'Toca o pulsa Espacio para jugar otra'],C.coral);
+    if (this.stuck && this.state==='play'){
+      c.font = BODY(13); c.fillStyle = C.muted; c.textAlign = 'center'; c.fillText('Toca o pulsa Espacio para lanzar', W/2, 470);
+      if (this.lvlFlash > 0) label(c, `¬°NIVEL ${this.level}!`, W/2, 300, 18, C.sun);
+    }
+    if (this.state==='ready') banner(c,W,H,'ROMPELADRILLOS',['Mueve la pala con ‚Üê ‚Üí o el rat√≥n','Toca o pulsa Espacio para lanzar'],'#ff9f43');
+    if (this.state==='over') banner(c,W,H,'GAME OVER',[`${this.score} puntos ¬∑ nivel ${this.level}`,'Toca o pulsa Espacio para jugar otra'],C.coral);
   }
 };
 
 /* ---------- PONG ---------- */
 const Pong = {
-  id:'pong', name:'Pong', w:480, h:320, color:'#9fb4ff', thumbY:0, noSwipe:true, PH:64, PW:10, WIN:7,
-  desc:'El tenis de mesa original contra la máquina. Gana quien llegue antes a 7.', keys:'↑ ↓ o arrastrar',
-  pad:[{a:'up',l:'↑',held:1},{a:'down',l:'↓',held:1}],
-  hint:'<kbd>↑ ↓</kbd> o <kbd>W S</kbd> para mover tu pala, o muévela con el ratón o el dedo. Gana el primero que llegue a 7.',
-  reset(){ Object.assign(this,{py:128,cy:128,me:0,cpu:0,score:0,state:'ready'}); this.serve(1) },
-  serve(dir){ this.bx = 240; this.by = 160; const a = Math.random()*.8-.4; this.sp = 280; this.vx = Math.cos(a)*this.sp*dir; this.vy = Math.sin(a)*this.sp; this.wait = .8 },
-  demo(){ this.reset(); this.state='play'; this.me=3; this.cpu=2; this.bx=300; this.by=110; this.py=140; this.cy=80 },
+  id:'pong', name:'Pong', w:480, h:320, color:'#9fb4ff', thumbY:0, noSwipe:true, PH:64, PW:10, WIN:5,
+  desc:'Gana partidos a 5 puntos contra la m√°quina. En cada nivel la m√°quina es m√°s r√°pida.', keys:'‚Üë ‚Üì o arrastrar',
+  pad:[{a:'up',l:'‚Üë',held:1},{a:'down',l:'‚Üì',held:1}],
+  hint:'<kbd>‚Üë ‚Üì</kbd> o <kbd>W S</kbd> para mover tu pala, o mu√©vela con el rat√≥n o el dedo. Gana el partido a 5 para pasar de nivel.',
+  reset(){ Object.assign(this,{L:1,score:0,state:'ready'}); this.round() },
+  round(){ Object.assign(this,{py:128,cy:128,me:0,cpu:0}); this.serve(1) },
+  serve(dir){ this.bx = 240; this.by = 160; const a = Math.random()*.8-.4; this.sp = 250 + this.L*15; this.vx = Math.cos(a)*this.sp*dir; this.vy = Math.sin(a)*this.sp; this.wait = .8 },
+  demo(){ this.reset(); this.state='play'; this.L=3; this.me=3; this.cpu=2; this.bx=300; this.by=110; this.py=140; this.cy=80 },
   input(a){
     if (this.state==='over'){ if (a==='action'||a==='tap'){ this.reset(); this.state='play' } return }
+    if (this.state==='won'){ if (a==='action'||a==='tap'){ this.L++; this.round(); this.state='play' } return }
     if (this.state==='ready' && ['action','tap','up','down'].includes(a)) this.state='play';
   },
   drag(x,y,down){ this.py = clamp(y-this.PH/2, 0, this.h-this.PH); if (down && this.state==='ready') this.state='play' },
   update(dt){
     if (this.state!=='play') return;
     const H=this.h, PH=this.PH;
-    if (held.has('up')) this.py -= 360*dt;
-    if (held.has('down')) this.py += 360*dt;
+    if (held.has('up')) this.py -= 380*dt;
+    if (held.has('down')) this.py += 380*dt;
     this.py = clamp(this.py, 0, H-PH);
-    const target = (this.vx > 0 ? this.by : H/2) - PH/2, cs = 230*dt;
+    const target = (this.vx > 0 ? this.by : H/2) - PH/2, cs = (170 + this.L*35)*dt;
     this.cy = clamp(this.cy + clamp(target-this.cy, -cs, cs), 0, H-PH);
     if (this.wait > 0){ this.wait -= dt; return }
     this.bx += this.vx*dt; this.by += this.vy*dt;
@@ -751,47 +952,61 @@ const Pong = {
     if (this.vx < 0 && this.bx-6 < 30 && this.bx > 14 && this.by > this.py-6 && this.by < this.py+PH+6) this.hit(this.py, 1);
     if (this.vx > 0 && this.bx+6 > this.w-30 && this.bx < this.w-14 && this.by > this.cy-6 && this.by < this.cy+PH+6) this.hit(this.cy, -1);
     if (this.bx < -10){ this.cpu++; this.point(1) }
-    else if (this.bx > this.w+10){ this.me++; this.score = this.me; this.point(-1) }
+    else if (this.bx > this.w+10){ this.me++; this.score++; this.point(-1) }
   },
   hit(py, dir){
     const rel = (this.by-(py+this.PH/2))/(this.PH/2);
-    this.sp = Math.min(620, this.sp*1.06);
+    this.sp = Math.min(560 + this.L*20, this.sp*1.06);
     this.vx = Math.cos(rel)*this.sp*dir; this.vy = Math.sin(rel)*this.sp;
     this.bx = dir > 0 ? 36 : this.w-36;
   },
-  point(dir){ if (this.me >= this.WIN || this.cpu >= this.WIN){ this.state = 'over'; return } this.serve(dir) },
+  point(dir){
+    if (this.me >= this.WIN){ this.state = 'won'; return }
+    if (this.cpu >= this.WIN){ this.state = 'over'; return }
+    this.serve(dir);
+  },
   draw(c){
     const W=this.w, H=this.h;
     c.fillStyle = C.deep; c.fillRect(0,0,W,H);
     c.fillStyle = C.line; for (let y=8;y<H;y+=24) c.fillRect(W/2-2, y, 4, 12);
     label(c, String(this.me), W/2-50, 36, 24, '#9fb4ff');
     label(c, String(this.cpu), W/2+50, 36, 24, C.coral);
-    c.font = PIX(8); c.fillStyle = C.muted; c.textAlign = 'center'; c.fillText('TU', W/2-50, 64); c.fillText('CPU', W/2+50, 64);
+    c.font = PIX(8); c.fillStyle = C.muted; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText('TU', W/2-50, 64); c.fillText('CPU', W/2+50, 64);
+    label(c, `NIVEL ${this.L}`, 12, H-14, 8, C.ink, 'left');
     c.fillStyle = '#9fb4ff'; rr(c, 20, this.py, this.PW, this.PH, 4);
     c.fillStyle = C.coral; rr(c, W-30, this.cy, this.PW, this.PH, 4);
     c.fillStyle = C.ink; c.fillRect(this.bx-6, this.by-6, 12, 12);
-    if (this.state==='ready') banner(c,W,H,'PONG',['Mueve tu pala con ↑ ↓, el ratón o el dedo','Toca o pulsa Espacio para empezar'],'#9fb4ff');
-    if (this.state==='over') banner(c,W,H,this.me>=this.WIN?'¡HAS GANADO!':'HAS PERDIDO',[`Tú ${this.me} – ${this.cpu} CPU`,'Toca o pulsa Espacio para jugar otra'],this.me>=this.WIN?C.sun:C.coral);
+    if (this.state==='ready') banner(c,W,H,'PONG',['Mueve tu pala con ‚Üë ‚Üì, el rat√≥n o el dedo','Gana a 5 puntos para pasar de nivel'],'#9fb4ff');
+    if (this.state==='won') banner(c,W,H,`¬°NIVEL ${this.L} SUPERADO!`,[`T√∫ ${this.me} ‚Äì ${this.cpu} CPU`,'Toca para jugar contra una m√°quina m√°s r√°pida'],C.sun);
+    if (this.state==='over') banner(c,W,H,'HAS PERDIDO',[`T√∫ ${this.me} ‚Äì ${this.cpu} CPU en el nivel ${this.L}`,'Toca o pulsa Espacio para volver a empezar'],C.coral);
   }
 };
 
 /* ---------- BUSCAMINAS ---------- */
 const NUMC = [null,'#5b7cff','#6be37a',C.coral,C.violet,'#ff9f43',C.teal,C.ink,C.muted];
+const MLV = [{n:9,m:10},{n:10,m:15},{n:12,m:24},{n:14,m:36},{n:16,m:50}];
 const Mines = {
-  id:'mines', name:'Buscaminas', w:360, h:382, color:'#5b7cff', thumbY:56, noSwipe:true, M:10, S:36, OX:18, OY:40,
-  desc:'Abre casillas sin pisar ninguna de las 10 minas. Los números te dan las pistas.', keys:'Clic o toque',
+  id:'mines', name:'Buscaminas', w:360, h:384, color:'#5b7cff', thumbY:56, noSwipe:true, OY:44,
+  desc:'Despeja el tablero sin pisar minas. Cada nivel el tablero es m√°s grande y tiene m√°s minas.', keys:'Clic o toque',
   pad:[{a:'flagmode', l:'Cambiar modo', wide:true}],
-  hint:'Toca o haz clic para abrir. Clic derecho, pulsación larga o el modo bandera para marcar minas. Teclado: flechas, <kbd>Espacio</kbd> abre y <kbd>F</kbd> marca.',
-  reset(){ this.g = [...Array(81)].map(() => ({m:0,n:0,o:0,f:0})); Object.assign(this,{placed:false,state:'play',score:0,cx:4,cy:4,flagMode:false,time:0,boom:-1,kb:false}) },
+  hint:'Toca o haz clic para abrir. Clic derecho, pulsaci√≥n larga o el modo bandera para marcar minas. Teclado: flechas, <kbd>Espacio</kbd> abre y <kbd>F</kbd> marca. Despeja el tablero para pasar de nivel.',
+  reset(){ this.L = 1; this.score = 0; this.flagMode = false; this.board() },
+  board(){
+    const d = MLV[Math.min(this.L, MLV.length)-1];
+    this.N = d.n; this.M = d.m; this.S = Math.floor(324/d.n); this.OX = (this.w - d.n*this.S)/2;
+    this.g = [...Array(d.n*d.n)].map(() => ({m:0,n:0,o:0,f:0}));
+    Object.assign(this,{placed:false,state:'play',opened:0,cx:d.n>>1,cy:d.n>>1,time:0,boom:-1,kb:false});
+  },
   demo(){ this.reset(); this.open(40); this.g.forEach((q,i) => { if (q.m && i%3===0) q.f = 1 }) },
   nb(i){
-    const x = i%9, y = i/9|0, out = [];
-    for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++){ const X=x+dx, Y=y+dy; if ((dx||dy) && X>=0 && Y>=0 && X<9 && Y<9) out.push(Y*9+X) }
+    const N = this.N, x = i%N, y = i/N|0, out = [];
+    for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++){ const X=x+dx, Y=y+dy; if ((dx||dy) && X>=0 && Y>=0 && X<N && Y<N) out.push(Y*N+X) }
     return out;
   },
   place(safe){
     const ban = new Set([safe, ...this.nb(safe)]); let k = 0;
-    while (k < this.M){ const i = Math.random()*81|0; if (this.g[i].m || ban.has(i)) continue; this.g[i].m = 1; k++ }
+    while (k < this.M){ const i = Math.random()*this.g.length|0; if (this.g[i].m || ban.has(i)) continue; this.g[i].m = 1; k++ }
     this.g.forEach((q,i) => q.n = this.nb(i).filter(j => this.g[j].m).length);
     this.placed = true;
   },
@@ -800,128 +1015,159 @@ const Mines = {
     if (!this.placed) this.place(i);
     if (c.m){ this.boom = i; this.state = 'over'; this.g.forEach(q => { if (q.m) q.o = 1 }); this.endT = performance.now(); return }
     const st = [i];
-    while (st.length){ const k = st.pop(), q = this.g[k]; if (q.o || q.f) continue; q.o = 1; this.score++; if (!q.n) this.nb(k).forEach(j => { if (!this.g[j].o) st.push(j) }) }
-    if (this.score === 81-this.M){ this.state = 'won'; this.g.forEach(q => { if (q.m) q.f = 1 }); this.endT = performance.now() }
+    while (st.length){ const k = st.pop(), q = this.g[k]; if (q.o || q.f) continue; q.o = 1; this.opened++; this.score++; if (!q.n) this.nb(k).forEach(j => { if (!this.g[j].o) st.push(j) }) }
+    if (this.opened === this.g.length - this.M){ this.state = 'won'; this.score += 100*this.L; this.g.forEach(q => { if (q.m) q.f = 1 }); this.endT = performance.now() }
   },
   flag(i){ const c = this.g[i]; if (!c.o) c.f ^= 1 },
+  advance(){ if (performance.now()-this.endT < 500) return; if (this.state==='won') this.L++; this.board() },
   click(x,y,o){
-    if (this.state!=='play'){ if (performance.now()-this.endT > 500) this.reset(); return }
+    if (this.state!=='play'){ this.advance(); return }
     const cx = Math.floor((x-this.OX)/this.S), cy = Math.floor((y-this.OY)/this.S);
-    if (cx<0 || cy<0 || cx>8 || cy>8) return;
-    const i = cy*9+cx; this.cx = cx; this.cy = cy; this.kb = false;
+    if (cx<0 || cy<0 || cx>=this.N || cy>=this.N) return;
+    const i = cy*this.N+cx; this.cx = cx; this.cy = cy; this.kb = false;
     if (o.right || o.long || this.flagMode) this.flag(i); else this.open(i);
   },
   input(a){
-    if (this.state!=='play'){ if (a==='action') this.reset(); return }
+    if (this.state!=='play'){ if (a==='action') this.advance(); return }
     const D = {left:[-1,0],right:[1,0],up:[0,-1],down:[0,1]}[a];
-    if (D){ this.kb = true; this.cx = clamp(this.cx+D[0],0,8); this.cy = clamp(this.cy+D[1],0,8) }
-    if (a==='action'){ this.kb = true; this.open(this.cy*9+this.cx) }
-    if (a==='flag'){ this.kb = true; this.flag(this.cy*9+this.cx) }
+    if (D){ this.kb = true; this.cx = clamp(this.cx+D[0],0,this.N-1); this.cy = clamp(this.cy+D[1],0,this.N-1) }
+    if (a==='action'){ this.kb = true; this.open(this.cy*this.N+this.cx) }
+    if (a==='flag'){ this.kb = true; this.flag(this.cy*this.N+this.cx) }
     if (a==='flagmode') this.flagMode = !this.flagMode;
   },
   update(dt){ if (this.placed && this.state==='play') this.time += dt },
   draw(c){
-    const S = this.S;
+    const S = this.S, N = this.N;
     c.fillStyle = C.deep; c.fillRect(0,0,this.w,this.h);
     const flags = this.g.filter(q => q.f).length;
     c.font = PIX(10); c.textBaseline = 'middle';
-    c.textAlign = 'left'; c.fillStyle = C.coral; c.fillText(`MINAS ${this.M-flags}`, this.OX, 20);
-    c.textAlign = 'center'; c.fillStyle = this.flagMode ? C.sun : C.muted; c.fillText(this.flagMode ? 'MODO BANDERA' : 'MODO ABRIR', this.w/2, 20);
-    c.textAlign = 'right'; c.fillStyle = C.ink; c.fillText(String(Math.floor(this.time)).padStart(3,'0'), this.w-this.OX, 20);
+    c.textAlign = 'left'; c.fillStyle = C.coral; c.fillText(`MINAS ${this.M-flags}`, 18, 22);
+    c.textAlign = 'center'; c.fillStyle = C.sun; c.fillText(`NIVEL ${this.L}`, this.w/2, 22);
+    c.textAlign = 'right'; c.fillStyle = C.ink; c.fillText(String(Math.floor(this.time)).padStart(3,'0'), this.w-18, 22);
     this.g.forEach((q,i) => {
-      const x = this.OX+(i%9)*S, y = this.OY+(i/9|0)*S;
+      const x = this.OX+(i%N)*S, y = this.OY+(i/N|0)*S;
       if (!q.o){
-        c.fillStyle = C.panel2; rr(c, x+1, y+1, S-2, S-2, 6);
-        c.fillStyle = 'rgba(255,255,255,.08)'; c.fillRect(x+5, y+4, S-10, 3);
-        if (q.f){ c.fillStyle = C.ink; c.fillRect(x+14, y+9, 3, 19); c.fillStyle = C.coral; c.beginPath(); c.moveTo(x+17,y+9); c.lineTo(x+28,y+14); c.lineTo(x+17,y+19); c.closePath(); c.fill() }
+        c.fillStyle = C.panel2; rr(c, x+1, y+1, S-2, S-2, Math.min(6, S/5));
+        c.fillStyle = 'rgba(255,255,255,.08)'; c.fillRect(x+4, y+3, S-8, 2);
+        if (q.f){
+          c.fillStyle = C.ink; c.fillRect(x+S*.38, y+S*.22, Math.max(2,S*.08), S*.56);
+          c.fillStyle = C.coral; c.beginPath(); c.moveTo(x+S*.46,y+S*.22); c.lineTo(x+S*.8,y+S*.36); c.lineTo(x+S*.46,y+S*.5); c.closePath(); c.fill();
+        }
       } else {
         c.fillStyle = i===this.boom ? C.coral : '#1b1740'; c.fillRect(x+1, y+1, S-2, S-2);
-        if (q.m){ c.fillStyle = C.deep; c.beginPath(); c.arc(x+S/2, y+S/2, 8, 0, 7); c.fill(); c.strokeStyle = C.ink; c.lineWidth = 2; c.stroke() }
-        else if (q.n){ c.font = PIX(14); c.textAlign = 'center'; c.fillStyle = NUMC[q.n]; c.fillText(String(q.n), x+S/2+1, y+S/2+2) }
+        if (q.m){ c.fillStyle = C.deep; c.beginPath(); c.arc(x+S/2, y+S/2, S*.22, 0, 7); c.fill(); c.strokeStyle = C.ink; c.lineWidth = 2; c.stroke() }
+        else if (q.n){ c.font = PIX(Math.max(8, Math.floor(S*.4))); c.textAlign = 'center'; c.fillStyle = NUMC[q.n]; c.fillText(String(q.n), x+S/2+1, y+S/2+2) }
       }
     });
     if (this.kb && this.state==='play'){ c.strokeStyle = C.sun; c.lineWidth = 2; c.strokeRect(this.OX+this.cx*S+1, this.OY+this.cy*S+1, S-2, S-2) }
-    if (this.state==='won') banner(c,this.w,this.h,'¡DESPEJADO!',[`En ${Math.round(this.time)} segundos`,'Toca para jugar otra'],C.sun);
-    if (this.state==='over') banner(c,this.w,this.h,'¡BOOM!',['Has pisado una mina','Toca para jugar otra'],C.coral);
+    c.font = PIX(7); c.textAlign = 'center'; c.fillStyle = this.flagMode ? C.sun : C.muted; c.fillText(this.flagMode ? 'MODO BANDERA' : 'MODO ABRIR', this.w/2, this.h-8);
+    const nx = MLV[Math.min(this.L+1, MLV.length)-1];
+    if (this.state==='won') banner(c,this.w,this.h,'¬°DESPEJADO!',[`Nivel ${this.L} en ${Math.round(this.time)} segundos`,`Siguiente: ${nx.n}√ó${nx.n} con ${nx.m} minas`,'Toca para seguir'],C.sun);
+    if (this.state==='over') banner(c,this.w,this.h,'¬°BOOM!',['Has pisado una mina',`Toca para reintentar el nivel ${this.L}`],C.coral);
   }
 };
 
 /* ---------- ATRAPA EL TOPO ---------- */
 const Mole = {
   id:'mole', name:'Atrapa el Topo', w:360, h:400, color:'#e0a46b', thumbY:70,
-  desc:'Golpea todos los topos que puedas en 30 segundos. Los dorados valen el triple.', keys:'Clic o toque',
+  desc:'Llega a la meta de puntos en cada ronda. Los topos son cada vez m√°s r√°pidos y aparecen bombas.', keys:'Clic o toque',
   pad:[],
-  hint:'Toca o haz clic en los topos. Con teclado, las teclas <kbd>1</kbd> a <kbd>9</kbd> golpean cada agujero (1 arriba a la izquierda).',
-  reset(){ Object.assign(this,{holes:[...Array(9)].map(() => ({up:0,t:0,dur:1,gold:0})), score:0, time:30, state:'ready', spawn:0, pops:[], endT:0}) },
+  hint:'Toca o haz clic en los topos; los dorados valen el triple. No toques las bombas negras: restan puntos. Con teclado, las teclas <kbd>1</kbd> a <kbd>9</kbd> golpean cada agujero.',
+  reset(){ this.L = 1; this.score = 0; this.round(); this.state = 'ready' },
+  round(){
+    Object.assign(this,{holes:[...Array(9)].map(() => ({up:0,t:0,dur:1,gold:0,bomb:0})), time:25, spawn:.5, pops:[], got:0, target:80 + (this.L-1)*50, endT:0, red:0, state:'play'});
+  },
   demo(){
-    this.reset(); this.state='play'; this.time=18; this.score=120;
-    Object.assign(this.holes[1],{up:1,t:.3,dur:1}); Object.assign(this.holes[3],{up:1,t:.3,dur:1,gold:1}); Object.assign(this.holes[8],{up:1,t:.3,dur:1});
+    this.reset(); this.state='play'; this.L=3; this.target=180; this.got=120; this.time=18; this.score=260;
+    Object.assign(this.holes[1],{up:1,t:.3,dur:1}); Object.assign(this.holes[3],{up:1,t:.3,dur:1,gold:1}); Object.assign(this.holes[8],{up:1,t:.3,dur:1,bomb:1});
   },
   pos(i){ return {x:60+(i%3)*120, y:150+(i/3|0)*100} },
-  start(){ this.reset(); this.state='play' },
   whack(i){
     const o = this.holes[i]; if (!o.up || o.t > o.dur-.04) return;
-    const p = this.pos(i), pts = o.gold ? 30 : 10;
-    this.score += pts; o.up = 0; this.pops.push({x:p.x, y:p.y-70, t:.6, txt:'+'+pts});
+    const p = this.pos(i);
+    if (o.bomb){ this.score = Math.max(0, this.score-30); this.got -= 30; this.red = .3; this.pops.push({x:p.x, y:p.y-70, t:.6, txt:'-30', col:C.coral}) }
+    else { const pts = o.gold ? 30 : 10; this.score += pts; this.got += pts; this.pops.push({x:p.x, y:p.y-70, t:.6, txt:'+'+pts, col:C.sun}) }
+    o.up = 0;
+  },
+  next(){
+    if (performance.now()-this.endT < 600) return;
+    if (this.state==='ready'){ this.state='play'; return }
+    if (this.state==='next'){ this.L++; this.round(); return }
+    if (this.state==='over'){ this.reset(); this.state='play' }
   },
   press(x,y){
-    if (this.state!=='play'){ if (this.state==='ready' || performance.now()-this.endT > 600) this.start(); return }
+    if (this.state!=='play'){ this.next(); return }
     for (let i=0;i<9;i++){ const p = this.pos(i); if (Math.abs(x-p.x) < 50 && y > p.y-95 && y < p.y+22){ this.whack(i); return } }
   },
   input(a){
-    if (this.state!=='play'){ if ((a==='action'||a==='tap') && (this.state==='ready' || performance.now()-this.endT > 600)) this.start(); return }
+    if (this.state!=='play'){ if (a==='action'||a==='tap') this.next(); return }
     const m = /^n(\d)$/.exec(a); if (m) this.whack(+m[1]-1);
   },
   update(dt){
     for (const p of this.pops){ p.y -= 40*dt; p.t -= dt }
     this.pops = this.pops.filter(p => p.t > 0);
+    this.red = Math.max(0, this.red-dt);
     if (this.state!=='play') return;
     this.time -= dt;
-    if (this.time <= 0){ this.time = 0; this.state = 'over'; this.endT = performance.now(); this.holes.forEach(o => o.up = 0); return }
+    if (this.time <= 0){ this.time = 0; this.endT = performance.now(); this.holes.forEach(o => o.up = 0); this.state = this.got >= this.target ? 'next' : 'over'; return }
     this.holes.forEach(o => { if (o.up){ o.t += dt; if (o.t >= o.dur) o.up = 0 } });
     this.spawn -= dt;
     if (this.spawn <= 0){
-      const free = this.holes.filter(o => !o.up);
-      if (free.length) Object.assign(free[Math.random()*free.length|0], {up:1, t:0, dur:Math.max(.5, 1.15-(30-this.time)*.02), gold:Math.random() < .1});
-      this.spawn = .3 + Math.random()*.45;
+      const free = this.holes.filter(o => !o.up), L = this.L;
+      if (free.length) Object.assign(free[Math.random()*free.length|0], {up:1, t:0,
+        dur:Math.max(.38, 1.1 - (L-1)*.09 - (25-this.time)*.012),
+        bomb: L >= 2 && Math.random() < Math.min(.25, .1 + L*.03), gold: Math.random() < .1});
+      this.spawn = Math.max(.16, .5 - (L-1)*.05) + Math.random()*.35;
     }
   },
   draw(c){
     const W=this.w, H=this.h;
     const g = c.createLinearGradient(0,0,0,H); g.addColorStop(0,'#2b2370'); g.addColorStop(1,'#1d3a3a');
     c.fillStyle = g; c.fillRect(0,0,W,H);
-    label(c, `TIEMPO ${Math.ceil(this.time)}`, 14, 26, 11, this.time < 6 && this.state==='play' ? C.coral : C.ink, 'left');
+    label(c, `TIEMPO ${Math.ceil(this.time)}`, 12, 24, 9, this.time < 6 && this.state==='play' ? C.coral : C.ink, 'left');
+    label(c, `NIVEL ${this.L}`, W/2, 24, 9, C.sun);
+    label(c, `META ${Math.max(0,this.got)}/${this.target}`, W-12, 24, 9, this.got >= this.target ? '#6be37a' : C.ink, 'right');
     this.holes.forEach((o,i) => {
       const {x,y} = this.pos(i);
       c.fillStyle = '#0c0a1c'; c.beginPath(); c.ellipse(x, y, 44, 14, 0, 0, 7); c.fill();
       if (o.up){
         const k = clamp(Math.min(o.t/.08, (o.dur-o.t)/.08), 0, 1), top = y - 54*k;
         c.save(); c.beginPath(); c.rect(x-50, y-90, 100, 90); c.clip();
-        c.fillStyle = o.gold ? C.sun : '#8a5a3c'; c.beginPath(); c.ellipse(x, top+36, 30, 36, 0, 0, 7); c.fill();
-        c.fillStyle = o.gold ? '#fff3c4' : '#c49272'; c.beginPath(); c.ellipse(x, top+42, 18, 14, 0, 0, 7); c.fill();
-        c.fillStyle = C.deep;
-        c.beginPath(); c.arc(x-10, top+24, 3.5, 0, 7); c.fill();
-        c.beginPath(); c.arc(x+10, top+24, 3.5, 0, 7); c.fill();
-        c.fillStyle = '#ff8fa3'; c.beginPath(); c.ellipse(x, top+35, 6, 4, 0, 0, 7); c.fill();
+        if (o.bomb){
+          c.fillStyle = '#2a2540'; c.beginPath(); c.arc(x, top+34, 26, 0, 7); c.fill();
+          c.strokeStyle = '#8a84b0'; c.lineWidth = 3; c.beginPath(); c.moveTo(x+12, top+12); c.quadraticCurveTo(x+22, top-2, x+16, top-8); c.stroke();
+          c.fillStyle = C.coral; c.beginPath(); c.arc(x+16, top-8, 4 + Math.sin(performance.now()/60)*1.5, 0, 7); c.fill();
+          c.fillStyle = C.coral; c.fillRect(x-12, top+28, 8, 4); c.fillRect(x+4, top+28, 8, 4);
+        } else {
+          c.fillStyle = o.gold ? C.sun : '#8a5a3c'; c.beginPath(); c.ellipse(x, top+36, 30, 36, 0, 0, 7); c.fill();
+          c.fillStyle = o.gold ? '#fff3c4' : '#c49272'; c.beginPath(); c.ellipse(x, top+42, 18, 14, 0, 0, 7); c.fill();
+          c.fillStyle = C.deep;
+          c.beginPath(); c.arc(x-10, top+24, 3.5, 0, 7); c.fill();
+          c.beginPath(); c.arc(x+10, top+24, 3.5, 0, 7); c.fill();
+          c.fillStyle = '#ff8fa3'; c.beginPath(); c.ellipse(x, top+35, 6, 4, 0, 0, 7); c.fill();
+        }
         c.restore();
       }
       c.fillStyle = '#4a3f8f'; c.beginPath(); c.ellipse(x, y+1, 46, 12, 0, 0, Math.PI); c.fill();
     });
-    for (const p of this.pops){ c.globalAlpha = clamp(p.t*2,0,1); label(c, p.txt, p.x, p.y, 14, C.sun) }
+    for (const p of this.pops){ c.globalAlpha = clamp(p.t*2,0,1); label(c, p.txt, p.x, p.y, 14, p.col) }
     c.globalAlpha = 1;
-    if (this.state==='ready') banner(c,W,H,'ATRAPA EL TOPO',['Toca los topos antes de que se escondan','Tienes 30 segundos'],'#e0a46b');
-    if (this.state==='over') banner(c,W,H,'¡TIEMPO!',[`${this.score} puntos`,'Toca para jugar otra'],C.sun);
+    if (this.red > 0){ c.fillStyle = `rgba(255,111,97,${this.red})`; c.fillRect(0,0,W,H) }
+    if (this.state==='ready') banner(c,W,H,'ATRAPA EL TOPO',[`Consigue ${this.target} puntos en 25 segundos`,'Toca para empezar'],'#e0a46b');
+    if (this.state==='next') banner(c,W,H,`¬°NIVEL ${this.L} SUPERADO!`,[`${this.got} de ${this.target} puntos`,`Siguiente meta: ${this.target+50} ¬∑ topos m√°s r√°pidos`,'Toca para seguir'],C.sun);
+    if (this.state==='over') banner(c,W,H,'¬°TIEMPO!',[`${Math.max(0,this.got)} de ${this.target} puntos en el nivel ${this.L}`,'Toca para volver a empezar'],C.coral);
   }
 };
 
 const GAMES = {dash:Dash, flappy:Flappy, tetris:Tetris, snake:Snake, '2048':G2048, invaders:Invaders, breakout:Breakout, pong:Pong, mines:Mines, mole:Mole};
+const ORDER = ['dash','flappy','tetris','snake','2048','invaders','breakout','pong','mines','mole'];
 
 /* ---------- Gestor ---------- */
 const cv = $('#cv'), ctx = cv.getContext('2d');
 let cur = null, paused = false, last = 0, best = 0;
 const dpr = Math.min(2, window.devicePixelRatio || 1);
 
-$('#grid').innerHTML = Object.values(GAMES).map(g => `
+$('#grid').innerHTML = ORDER.map(id => GAMES[id]).map(g => `
   <button class="cart" data-game="${g.id}" style="--c:${g.color}">
     <canvas class="thumb" width="360" height="270"></canvas>
     <span class="cart-body">
