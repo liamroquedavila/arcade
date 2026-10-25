@@ -83,21 +83,21 @@ footer{color:var(--muted);font-size:13px}
 <div class="wrap">
   <section id="menu" class="wrap" style="gap:32px">
     <header class="marquee">
-      <span class="coin">INSERTA MONEDA ‚ñ∏ 1 CR√âDITO</span>
+      <span class="coin">INSERTA MONEDA ▸ 1 CRÉDITO</span>
       <h1>Arcade de Bolsillo</h1>
-      <p class="lede">Diez cl√°sicos con niveles que se ponen cada vez m√°s dif√≠ciles. Se juegan con teclado o con el dedo, y tus r√©cords se guardan en este dispositivo.</p>
+      <p class="lede">Diez clásicos con niveles que se ponen cada vez más difíciles. Se juegan con teclado o con el dedo, y tus récords se guardan en este dispositivo.</p>
     </header>
     <div class="grid" id="grid"></div>
-    <footer><kbd>P</kbd> pausa ¬∑ <kbd>Esc</kbd> vuelve al men√∫</footer>
+    <footer><kbd>P</kbd> pausa · <kbd>Esc</kbd> vuelve al menú</footer>
   </section>
 
   <section id="game" class="game" hidden>
     <div class="topbar">
-      <button class="back" id="back">‚Üê Men√∫</button>
+      <button class="back" id="back">← Menú</button>
       <h2 class="gname" id="gname">Juego</h2>
       <div class="hud">
         <div class="stat"><span>Puntos</span><b id="score">0</b></div>
-        <div class="stat"><span>R√©cord</span><b id="best">0</b></div>
+        <div class="stat"><span>Récord</span><b id="best">0</b></div>
       </div>
     </div>
     <canvas id="cv"></canvas>
@@ -146,9 +146,9 @@ function rr(c, x, y, w, h, r){
 /* ---------- GEOMETRY DASH ---------- */
 const Dash = {
   id:'dash', name:'Geometry Dash', w:480, h:300, color:'#ff5fa2', thumbY:0, tapOnDown:true,
-  desc:'Niveles infinitos cada vez m√°s r√°pidos, con pinchos, saltadores, orbes y tramos en cohete.', keys:'Espacio o toque',
-  pad:[{a:'left',l:'‚óÄ'},{a:'action',l:'Saltar',wide:true,held:1},{a:'right',l:'‚ñ∂'}],
-  hint:'<kbd>Espacio</kbd>, <kbd>‚Üë</kbd>, clic o toque para saltar. En el cohete, mant√©n pulsado para subir. Las almohadillas amarillas te lanzan y los aros amarillos dan un salto extra. Antes de empezar, <kbd>‚óÄ ‚ñ∂</kbd> cambian de nivel.',
+  desc:'Niveles infinitos cada vez más rápidos, con pinchos, saltadores, orbes y tramos en cohete.', keys:'Espacio o toque',
+  pad:[{a:'left',l:'◀'},{a:'action',l:'Saltar',wide:true,held:1},{a:'right',l:'▶'}],
+  hint:'<kbd>Espacio</kbd>, <kbd>↑</kbd>, clic o toque para saltar. En el cohete, mantén pulsado para subir. Las almohadillas amarillas te lanzan y los aros amarillos dan un salto extra. Antes de empezar, <kbd>◀ ▶</kbd> cambian de nivel.',
   G:240, S:28, X:110, lvl:1, attempt:1,
   speed(){ return Math.min(250 + (this.lvl-1)*18, 430) },
   reset(){
@@ -346,18 +346,18 @@ const Dash = {
     c.fillStyle = 'rgba(0,0,0,.35)'; rr(c, 170, 12, 140, 10, 5);
     c.fillStyle = C.sun; if (pct > 0) rr(c, 170, 12, 140*pct/100, 10, 5);
     label(c, `${pct}%`, W-14, 18, 10, '#fff', 'right');
-    if (this.state==='ready') banner(c,W,H,`NIVEL ${this.lvl}`,['Toca o pulsa Espacio para empezar', this.max > 1 ? `‚óÄ ‚ñ∂ cambian de nivel (tienes ${this.max} desbloqueados)` : 'Supera el nivel para desbloquear el siguiente'],'#ff5fa2');
-    if (this.state==='over' && this.t > .3) banner(c,W,H,'¬°CRASH!',[`Has llegado al ${pct}% en el intento ${this.attempt}`,'Toca o pulsa Espacio para reintentar'],C.coral);
-    if (this.state==='win' && this.t > .3) banner(c,W,H,`¬°NIVEL ${this.lvl} SUPERADO!`,[`Lo has conseguido en ${plural(this.attempt,'intento')}`,'Toca para pasar al siguiente nivel'],C.sun);
+    if (this.state==='ready') banner(c,W,H,`NIVEL ${this.lvl}`,['Toca o pulsa Espacio para empezar', this.max > 1 ? `◀ ▶ cambian de nivel (tienes ${this.max} desbloqueados)` : 'Supera el nivel para desbloquear el siguiente'],'#ff5fa2');
+    if (this.state==='over' && this.t > .3) banner(c,W,H,'¡CRASH!',[`Has llegado al ${pct}% en el intento ${this.attempt}`,'Toca o pulsa Espacio para reintentar'],C.coral);
+    if (this.state==='win' && this.t > .3) banner(c,W,H,`¡NIVEL ${this.lvl} SUPERADO!`,[`Lo has conseguido en ${plural(this.attempt,'intento')}`,'Toca para pasar al siguiente nivel'],C.sun);
   }
 };
 
 /* ---------- FLAPPY ---------- */
 const Flappy = {
   id:'flappy', name:'Flappy', w:360, h:540, color:C.sun, tapOnDown:true, thumbY:150,
-  desc:'Aletea entre las tuber√≠as. Cada 10 sube el nivel: m√°s r√°pido, m√°s estrecho y tuber√≠as que se mueven.', keys:'Espacio o toque',
+  desc:'Aletea entre las tuberías. Cada 10 sube el nivel: más rápido, más estrecho y tuberías que se mueven.', keys:'Espacio o toque',
   pad:[{a:'action', l:'Aletear', wide:true}],
-  hint:'<kbd>Espacio</kbd>, <kbd>‚Üë</kbd>, clic o toque en la pantalla para aletear. Cada 10 tuber√≠as subes de nivel.',
+  hint:'<kbd>Espacio</kbd>, <kbd>↑</kbd>, clic o toque en la pantalla para aletear. Cada 10 tuberías subes de nivel.',
   PW:56,
   reset(){ Object.assign(this,{y:240,v:0,pipes:[],spawn:.4,score:0,state:'ready',t:0,gx:0,time:0,lastL:1,lvlFlash:0}) },
   demo(){ this.reset(); this.state='play'; this.score=7; this.y=250; this.v=-120;
@@ -414,7 +414,7 @@ const Flappy = {
     c.fillStyle = '#1d1940'; c.fillRect(0,G,W,70);
     c.fillStyle = C.teal; c.fillRect(0,G,W,8);
     c.fillStyle = C.panel2; for (let x=-this.gx; x<W; x+=28) c.fillRect(x, G+20, 14, 6);
-    // p√°jaro
+    // pájaro
     const ang = this.state==='ready' ? 0 : Math.max(-.5, Math.min(1.3, this.v/550));
     c.save(); c.translate(90,this.y); c.rotate(ang);
     c.fillStyle = C.sun; c.beginPath(); c.arc(0,0,15,0,7); c.fill();
@@ -426,9 +426,9 @@ const Flappy = {
     c.fillStyle = C.coral; c.beginPath(); c.moveTo(12,0); c.lineTo(24,3); c.lineTo(12,8); c.closePath(); c.fill();
     c.restore();
     if (this.state!=='ready'){ label(c, String(this.score), W/2, 60, 32, '#fff'); label(c, `NIVEL ${L}`, 14, 22, 10, '#fff', 'left') }
-    if (this.lvlFlash > 0){ c.globalAlpha = clamp(this.lvlFlash, 0, 1); label(c, `¬°NIVEL ${L}!`, W/2, 120, 20, C.sun); c.globalAlpha = 1 }
-    if (this.state==='ready') banner(c,W,this.h,'FLAPPY',['Toca o pulsa Espacio para aletear','Cada 10 tuber√≠as subes de nivel'],C.sun);
-    if (this.state==='over') banner(c,W,this.h,'GAME OVER',[`${plural(this.score,'tuber√≠a')} ¬∑ nivel ${L}`,'Toca o pulsa Espacio para reintentar'],C.coral);
+    if (this.lvlFlash > 0){ c.globalAlpha = clamp(this.lvlFlash, 0, 1); label(c, `¡NIVEL ${L}!`, W/2, 120, 20, C.sun); c.globalAlpha = 1 }
+    if (this.state==='ready') banner(c,W,this.h,'FLAPPY',['Toca o pulsa Espacio para aletear','Cada 10 tuberías subes de nivel'],C.sun);
+    if (this.state==='over') banner(c,W,this.h,'GAME OVER',[`${plural(this.score,'tubería')} · nivel ${L}`,'Toca o pulsa Espacio para reintentar'],C.coral);
   }
 };
 
@@ -444,10 +444,10 @@ function block(c,x,y,s,col){
 }
 const Tetris = {
   id:'tetris', name:'Tetris', w:360, h:480, color:C.violet, repeatOK:true, thumbY:210,
-  desc:'Encaja las piezas y completa l√≠neas. Cada 10 l√≠neas sube el nivel y las piezas caen m√°s r√°pido.', keys:'Flechas y Espacio',
+  desc:'Encaja las piezas y completa líneas. Cada 10 líneas sube el nivel y las piezas caen más rápido.', keys:'Flechas y Espacio',
   swipe:{down:'drop', up:'rot'},
-  pad:[{a:'left',l:'‚Üê',hold:1},{a:'rot',l:'‚Üª'},{a:'right',l:'‚Üí',hold:1},{a:'down',l:'‚Üì',hold:1},{a:'drop',l:'Soltar'}],
-  hint:'<kbd>‚Üê ‚Üí</kbd> mover ¬∑ <kbd>‚Üë</kbd> girar ¬∑ <kbd>‚Üì</kbd> bajar ¬∑ <kbd>Espacio</kbd> soltar. En m√≥vil: toca para girar, desliza para mover.',
+  pad:[{a:'left',l:'←',hold:1},{a:'rot',l:'↻'},{a:'right',l:'→',hold:1},{a:'down',l:'↓',hold:1},{a:'drop',l:'Soltar'}],
+  hint:'<kbd>← →</kbd> mover · <kbd>↑</kbd> girar · <kbd>↓</kbd> bajar · <kbd>Espacio</kbd> soltar. En móvil: toca para girar, desliza para mover.',
   reset(){
     this.board = [...Array(20)].map(() => Array(10).fill(null));
     this.bag=[]; this.next=this.pick(); this.score=0; this.lines=0; this.level=1; this.state='ready'; this.acc=0; this.lvlFlash=0;
@@ -543,14 +543,14 @@ const Tetris = {
       c.font = PIX(8); c.fillStyle = C.muted; c.fillText(k, px, 150+i*70);
       label(c, String(v), px, 176+i*70, 18, C.ink);
     });
-    if (this.lvlFlash > 0){ c.globalAlpha = clamp(this.lvlFlash,0,1); label(c, `¬°NIVEL ${this.level}!`, 120, 200, 16, C.sun); c.globalAlpha = 1 }
+    if (this.lvlFlash > 0){ c.globalAlpha = clamp(this.lvlFlash,0,1); label(c, `¡NIVEL ${this.level}!`, 120, 200, 16, C.sun); c.globalAlpha = 1 }
     if (this.state==='ready') banner(c,240,480,'TETRIS',['Toca o pulsa una','tecla para empezar'],C.violet);
     if (this.state==='over') banner(c,240,480,'GAME OVER',[`${this.score} puntos`,`Nivel ${this.level}`,'Toca o Espacio: otra'],C.coral);
   }
 };
 
 /* ---------- SERPIENTE ---------- */
-// Obst√°culos de cada nivel como rect√°ngulos [x, y, ancho, alto]; la fila 9 queda libre a la izquierda para la salida
+// Obstáculos de cada nivel como rectángulos [x, y, ancho, alto]; la fila 9 queda libre a la izquierda para la salida
 const SNAKE_MAPS = [
   [],
   [[3,3,4,1],[11,3,4,1],[3,14,4,1],[11,14,4,1]],
@@ -561,9 +561,9 @@ const SNAKE_MAPS = [
 ];
 const Snake = {
   id:'snake', name:'Serpiente', w:360, h:360, color:C.teal, thumbY:45, N:18, S:20,
-  desc:'Come manzanas y crece. Cada nivel trae un mapa nuevo con muros y m√°s velocidad.', keys:'Flechas o deslizar',
-  pad:[{a:'up',l:'‚Üë',area:'up'},{a:'left',l:'‚Üê',area:'left'},{a:'down',l:'‚Üì',area:'down'},{a:'right',l:'‚Üí',area:'right'}], dpad:true,
-  hint:'<kbd>Flechas</kbd> o <kbd>WASD</kbd> para girar. En m√≥vil, desliza sobre la pantalla. Come las manzanas que pide cada nivel para pasar al siguiente mapa.',
+  desc:'Come manzanas y crece. Cada nivel trae un mapa nuevo con muros y más velocidad.', keys:'Flechas o deslizar',
+  pad:[{a:'up',l:'↑',area:'up'},{a:'left',l:'←',area:'left'},{a:'down',l:'↓',area:'down'},{a:'right',l:'→',area:'right'}], dpad:true,
+  hint:'<kbd>Flechas</kbd> o <kbd>WASD</kbd> para girar. En móvil, desliza sobre la pantalla. Come las manzanas que pide cada nivel para pasar al siguiente mapa.',
   reset(){ this.score = 0; this.eaten = 0; this.start(1); this.state = 'ready' },
   start(L){
     this.L = L; this.need = 5 + Math.floor(L/3); this.got = 0;
@@ -631,8 +631,8 @@ const Snake = {
     label(c, `NIVEL ${this.L}`, 8, 12, 8, C.ink, 'left');
     label(c, `${this.got}/${this.need}`, this.w-8, 12, 8, C.coral, 'right');
     if (this.state==='ready') banner(c,this.w,this.h,'SERPIENTE',[`Come ${this.need} manzanas para pasar de nivel`,'Pulsa una flecha o desliza para empezar'],C.teal);
-    if (this.state==='next') banner(c,this.w,this.h,`¬°NIVEL ${this.L+1}!`,['Nuevo mapa y m√°s velocidad','Prep√°rate‚Ä¶'],C.sun);
-    if (this.state==='over') banner(c,this.w,this.h,'GAME OVER',[`Nivel ${this.L} ¬∑ ${plural(this.eaten,'manzana')}`,'Toca o pulsa Espacio para reintentar'],C.coral);
+    if (this.state==='next') banner(c,this.w,this.h,`¡NIVEL ${this.L+1}!`,['Nuevo mapa y más velocidad','Prepárate…'],C.sun);
+    if (this.state==='over') banner(c,this.w,this.h,'GAME OVER',[`Nivel ${this.L} · ${plural(this.eaten,'manzana')}`,'Toca o pulsa Espacio para reintentar'],C.coral);
   }
 };
 
@@ -648,8 +648,8 @@ function slide(row){
 }
 const G2048 = {
   id:'2048', name:'2048', w:360, h:400, color:C.coral, thumbY:85, OY:40,
-  desc:'Junta n√∫meros iguales. Cada nivel te pide una ficha m√°s grande: 128, 256, 512‚Ä¶ hasta 2048 y m√°s all√°.', keys:'Flechas o deslizar',
-  pad:[{a:'up',l:'‚Üë',area:'up'},{a:'left',l:'‚Üê',area:'left'},{a:'down',l:'‚Üì',area:'down'},{a:'right',l:'‚Üí',area:'right'}], dpad:true,
+  desc:'Junta números iguales. Cada nivel te pide una ficha más grande: 128, 256, 512… hasta 2048 y más allá.', keys:'Flechas o deslizar',
+  pad:[{a:'up',l:'↑',area:'up'},{a:'left',l:'←',area:'left'},{a:'down',l:'↓',area:'down'},{a:'right',l:'→',area:'right'}], dpad:true,
   hint:'<kbd>Flechas</kbd> o <kbd>WASD</kbd> para deslizar todas las fichas. Dos fichas iguales se suman al chocar. Forma la ficha objetivo para subir de nivel.',
   reset(){ this.g=[...Array(4)].map(()=>Array(4).fill(0)); this.score=0; this.state='play'; this.L=1; this.born=[]; this.add(); this.add() },
   demo(){ this.reset(); this.L=5; this.g=[[2,4,8,16],[0,2,32,64],[0,0,128,256],[0,4,512,1024]]; this.born=[] },
@@ -703,8 +703,8 @@ const G2048 = {
       c.font = PIX([0,22,20,16,13,11][Math.min(5,digits)]*k); c.fillStyle = fg; c.textAlign='center'; c.textBaseline='middle';
       c.fillText(String(v), x+T/2+1, y+T/2+2);
     }
-    if (this.state==='won') banner(c,this.w,this.h,`¬°NIVEL ${this.L}!`,[`Has formado la ficha ${this.reached}`,`Siguiente objetivo: ${GOALS[this.L-1]}`,'Toca o pulsa Espacio para seguir'],C.sun);
-    if (this.state==='over') banner(c,this.w,this.h,'SIN MOVIMIENTOS',[`${this.score} puntos ¬∑ nivel ${this.L}`,'Toca o pulsa Espacio para reintentar'],C.coral);
+    if (this.state==='won') banner(c,this.w,this.h,`¡NIVEL ${this.L}!`,[`Has formado la ficha ${this.reached}`,`Siguiente objetivo: ${GOALS[this.L-1]}`,'Toca o pulsa Espacio para seguir'],C.sun);
+    if (this.state==='over') banner(c,this.w,this.h,'SIN MOVIMIENTOS',[`${this.score} puntos · nivel ${this.L}`,'Toca o pulsa Espacio para reintentar'],C.coral);
   }
 };
 
@@ -713,9 +713,9 @@ const ALIEN = [['0011100','0111110','1101011','1111111','0101010','1000001'],['0
 const AC = [C.coral,'#ff9f43',C.sun,'#6be37a',C.teal];
 const Invaders = {
   id:'invaders', name:'Invasores', w:360, h:480, color:'#6be37a', thumbY:40, noSwipe:true,
-  desc:'Defiende la Tierra tras tus escudos. Cada nivel los marcianos bajan m√°s r√°pido y disparan m√°s.', keys:'Flechas y Espacio',
-  pad:[{a:'left',l:'‚Üê',held:1},{a:'action',l:'Disparar',held:1},{a:'right',l:'‚Üí',held:1}],
-  hint:'<kbd>‚Üê ‚Üí</kbd> para moverte y <kbd>Espacio</kbd> para disparar. Con rat√≥n o dedo: arrastra para moverte y mant√©n pulsado para disparar. Desde el nivel 2 pasa un platillo que da puntos extra.',
+  desc:'Defiende la Tierra tras tus escudos. Cada nivel los marcianos bajan más rápido y disparan más.', keys:'Flechas y Espacio',
+  pad:[{a:'left',l:'←',held:1},{a:'action',l:'Disparar',held:1},{a:'right',l:'→',held:1}],
+  hint:'<kbd>← →</kbd> para moverte y <kbd>Espacio</kbd> para disparar. Con ratón o dedo: arrastra para moverte y mantén pulsado para disparar. Desde el nivel 2 pasa un platillo que da puntos extra.',
   reset(){ Object.assign(this,{sx:165,lives:3,score:0,wave:1,state:'ready',shots:[],bombs:[],cool:0,inv:0,boom:[],pops:[],ufo:null,ufoT:14,lvlFlash:0}); this.spawnWave() },
   spawnWave(){
     this.al = [];
@@ -824,9 +824,9 @@ const Invaders = {
     c.globalAlpha = 1;
     label(c, `VIDAS ${this.lives}`, 12, 24, 10, C.ink, 'left');
     label(c, `NIVEL ${this.wave}`, W-12, 24, 10, C.ink, 'right');
-    if (this.lvlFlash > 0){ c.globalAlpha = clamp(this.lvlFlash,0,1); label(c, `¬°NIVEL ${this.wave}!`, W/2, 250, 18, C.sun); c.globalAlpha = 1 }
-    if (this.state==='ready') banner(c,W,H,'INVASORES',['Mu√©vete con ‚Üê ‚Üí y dispara con Espacio','o arrastra y mant√©n pulsado'],'#6be37a');
-    if (this.state==='over') banner(c,W,H,'INVASI√ìN',[`${this.score} puntos ¬∑ nivel ${this.wave}`,'Toca o pulsa Espacio para reintentar'],C.coral);
+    if (this.lvlFlash > 0){ c.globalAlpha = clamp(this.lvlFlash,0,1); label(c, `¡NIVEL ${this.wave}!`, W/2, 250, 18, C.sun); c.globalAlpha = 1 }
+    if (this.state==='ready') banner(c,W,H,'INVASORES',['Muévete con ← → y dispara con Espacio','o arrastra y mantén pulsado'],'#6be37a');
+    if (this.state==='over') banner(c,W,H,'INVASIÓN',[`${this.score} puntos · nivel ${this.wave}`,'Toca o pulsa Espacio para reintentar'],C.coral);
   }
 };
 
@@ -843,9 +843,9 @@ const BRICKS = [
 const BCOL = [C.coral,'#ff9f43',C.sun,'#6be37a',C.teal,'#5b7cff',C.violet];
 const Breakout = {
   id:'breakout', name:'Rompeladrillos', w:360, h:480, color:'#ff9f43', thumbY:30, noSwipe:true, PW:70, PY:440,
-  desc:'Rompe todos los ladrillos. Cada nivel tiene un dibujo nuevo, ladrillos duros e irrompibles.', keys:'Flechas o rat√≥n',
-  pad:[{a:'left',l:'‚Üê',held:1},{a:'action',l:'Lanzar'},{a:'right',l:'‚Üí',held:1}],
-  hint:'<kbd>‚Üê ‚Üí</kbd>, el rat√≥n o el dedo para mover la pala. <kbd>Espacio</kbd> o toque para lanzar la bola. Los ladrillos con borde blanco necesitan dos golpes y los grises no se rompen.',
+  desc:'Rompe todos los ladrillos. Cada nivel tiene un dibujo nuevo, ladrillos duros e irrompibles.', keys:'Flechas o ratón',
+  pad:[{a:'left',l:'←',held:1},{a:'action',l:'Lanzar'},{a:'right',l:'→',held:1}],
+  hint:'<kbd>← →</kbd>, el ratón o el dedo para mover la pala. <kbd>Espacio</kbd> o toque para lanzar la bola. Los ladrillos con borde blanco necesitan dos golpes y los grises no se rompen.',
   reset(){ Object.assign(this,{px:145,lives:3,score:0,level:1,state:'ready'}); this.build(); this.stick() },
   build(){
     this.bricks = []; const bw = (this.w-20)/8, map = BRICKS[(this.level-1) % BRICKS.length];
@@ -914,19 +914,19 @@ const Breakout = {
     c.fillStyle = '#fff'; c.beginPath(); c.arc(this.bx, this.by, 6, 0, 7); c.fill();
     if (this.stuck && this.state==='play'){
       c.font = BODY(13); c.fillStyle = C.muted; c.textAlign = 'center'; c.fillText('Toca o pulsa Espacio para lanzar', W/2, 470);
-      if (this.lvlFlash > 0) label(c, `¬°NIVEL ${this.level}!`, W/2, 300, 18, C.sun);
+      if (this.lvlFlash > 0) label(c, `¡NIVEL ${this.level}!`, W/2, 300, 18, C.sun);
     }
-    if (this.state==='ready') banner(c,W,H,'ROMPELADRILLOS',['Mueve la pala con ‚Üê ‚Üí o el rat√≥n','Toca o pulsa Espacio para lanzar'],'#ff9f43');
-    if (this.state==='over') banner(c,W,H,'GAME OVER',[`${this.score} puntos ¬∑ nivel ${this.level}`,'Toca o pulsa Espacio para jugar otra'],C.coral);
+    if (this.state==='ready') banner(c,W,H,'ROMPELADRILLOS',['Mueve la pala con ← → o el ratón','Toca o pulsa Espacio para lanzar'],'#ff9f43');
+    if (this.state==='over') banner(c,W,H,'GAME OVER',[`${this.score} puntos · nivel ${this.level}`,'Toca o pulsa Espacio para jugar otra'],C.coral);
   }
 };
 
 /* ---------- PONG ---------- */
 const Pong = {
   id:'pong', name:'Pong', w:480, h:320, color:'#9fb4ff', thumbY:0, noSwipe:true, PH:64, PW:10, WIN:5,
-  desc:'Gana partidos a 5 puntos contra la m√°quina. En cada nivel la m√°quina es m√°s r√°pida.', keys:'‚Üë ‚Üì o arrastrar',
-  pad:[{a:'up',l:'‚Üë',held:1},{a:'down',l:'‚Üì',held:1}],
-  hint:'<kbd>‚Üë ‚Üì</kbd> o <kbd>W S</kbd> para mover tu pala, o mu√©vela con el rat√≥n o el dedo. Gana el partido a 5 para pasar de nivel.',
+  desc:'Gana partidos a 5 puntos contra la máquina. En cada nivel la máquina es más rápida.', keys:'↑ ↓ o arrastrar',
+  pad:[{a:'up',l:'↑',held:1},{a:'down',l:'↓',held:1}],
+  hint:'<kbd>↑ ↓</kbd> o <kbd>W S</kbd> para mover tu pala, o muévela con el ratón o el dedo. Gana el partido a 5 para pasar de nivel.',
   reset(){ Object.assign(this,{L:1,score:0,state:'ready'}); this.round() },
   round(){ Object.assign(this,{py:128,cy:128,me:0,cpu:0}); this.serve(1) },
   serve(dir){ this.bx = 240; this.by = 160; const a = Math.random()*.8-.4; this.sp = 250 + this.L*15; this.vx = Math.cos(a)*this.sp*dir; this.vy = Math.sin(a)*this.sp; this.wait = .8 },
@@ -977,9 +977,9 @@ const Pong = {
     c.fillStyle = '#9fb4ff'; rr(c, 20, this.py, this.PW, this.PH, 4);
     c.fillStyle = C.coral; rr(c, W-30, this.cy, this.PW, this.PH, 4);
     c.fillStyle = C.ink; c.fillRect(this.bx-6, this.by-6, 12, 12);
-    if (this.state==='ready') banner(c,W,H,'PONG',['Mueve tu pala con ‚Üë ‚Üì, el rat√≥n o el dedo','Gana a 5 puntos para pasar de nivel'],'#9fb4ff');
-    if (this.state==='won') banner(c,W,H,`¬°NIVEL ${this.L} SUPERADO!`,[`T√∫ ${this.me} ‚Äì ${this.cpu} CPU`,'Toca para jugar contra una m√°quina m√°s r√°pida'],C.sun);
-    if (this.state==='over') banner(c,W,H,'HAS PERDIDO',[`T√∫ ${this.me} ‚Äì ${this.cpu} CPU en el nivel ${this.L}`,'Toca o pulsa Espacio para volver a empezar'],C.coral);
+    if (this.state==='ready') banner(c,W,H,'PONG',['Mueve tu pala con ↑ ↓, el ratón o el dedo','Gana a 5 puntos para pasar de nivel'],'#9fb4ff');
+    if (this.state==='won') banner(c,W,H,`¡NIVEL ${this.L} SUPERADO!`,[`Tú ${this.me} – ${this.cpu} CPU`,'Toca para jugar contra una máquina más rápida'],C.sun);
+    if (this.state==='over') banner(c,W,H,'HAS PERDIDO',[`Tú ${this.me} – ${this.cpu} CPU en el nivel ${this.L}`,'Toca o pulsa Espacio para volver a empezar'],C.coral);
   }
 };
 
@@ -988,9 +988,9 @@ const NUMC = [null,'#5b7cff','#6be37a',C.coral,C.violet,'#ff9f43',C.teal,C.ink,C
 const MLV = [{n:9,m:10},{n:10,m:15},{n:12,m:24},{n:14,m:36},{n:16,m:50}];
 const Mines = {
   id:'mines', name:'Buscaminas', w:360, h:384, color:'#5b7cff', thumbY:56, noSwipe:true, OY:44,
-  desc:'Despeja el tablero sin pisar minas. Cada nivel el tablero es m√°s grande y tiene m√°s minas.', keys:'Clic o toque',
+  desc:'Despeja el tablero sin pisar minas. Cada nivel el tablero es más grande y tiene más minas.', keys:'Clic o toque',
   pad:[{a:'flagmode', l:'Cambiar modo', wide:true}],
-  hint:'Toca o haz clic para abrir. Clic derecho, pulsaci√≥n larga o el modo bandera para marcar minas. Teclado: flechas, <kbd>Espacio</kbd> abre y <kbd>F</kbd> marca. Despeja el tablero para pasar de nivel.',
+  hint:'Toca o haz clic para abrir. Clic derecho, pulsación larga o el modo bandera para marcar minas. Teclado: flechas, <kbd>Espacio</kbd> abre y <kbd>F</kbd> marca. Despeja el tablero para pasar de nivel.',
   reset(){ this.L = 1; this.score = 0; this.flagMode = false; this.board() },
   board(){
     const d = MLV[Math.min(this.L, MLV.length)-1];
@@ -1062,15 +1062,15 @@ const Mines = {
     if (this.kb && this.state==='play'){ c.strokeStyle = C.sun; c.lineWidth = 2; c.strokeRect(this.OX+this.cx*S+1, this.OY+this.cy*S+1, S-2, S-2) }
     c.font = PIX(7); c.textAlign = 'center'; c.fillStyle = this.flagMode ? C.sun : C.muted; c.fillText(this.flagMode ? 'MODO BANDERA' : 'MODO ABRIR', this.w/2, this.h-8);
     const nx = MLV[Math.min(this.L+1, MLV.length)-1];
-    if (this.state==='won') banner(c,this.w,this.h,'¬°DESPEJADO!',[`Nivel ${this.L} en ${Math.round(this.time)} segundos`,`Siguiente: ${nx.n}√ó${nx.n} con ${nx.m} minas`,'Toca para seguir'],C.sun);
-    if (this.state==='over') banner(c,this.w,this.h,'¬°BOOM!',['Has pisado una mina',`Toca para reintentar el nivel ${this.L}`],C.coral);
+    if (this.state==='won') banner(c,this.w,this.h,'¡DESPEJADO!',[`Nivel ${this.L} en ${Math.round(this.time)} segundos`,`Siguiente: ${nx.n}×${nx.n} con ${nx.m} minas`,'Toca para seguir'],C.sun);
+    if (this.state==='over') banner(c,this.w,this.h,'¡BOOM!',['Has pisado una mina',`Toca para reintentar el nivel ${this.L}`],C.coral);
   }
 };
 
 /* ---------- ATRAPA EL TOPO ---------- */
 const Mole = {
   id:'mole', name:'Atrapa el Topo', w:360, h:400, color:'#e0a46b', thumbY:70,
-  desc:'Llega a la meta de puntos en cada ronda. Los topos son cada vez m√°s r√°pidos y aparecen bombas.', keys:'Clic o toque',
+  desc:'Llega a la meta de puntos en cada ronda. Los topos son cada vez más rápidos y aparecen bombas.', keys:'Clic o toque',
   pad:[],
   hint:'Toca o haz clic en los topos; los dorados valen el triple. No toques las bombas negras: restan puntos. Con teclado, las teclas <kbd>1</kbd> a <kbd>9</kbd> golpean cada agujero.',
   reset(){ this.L = 1; this.score = 0; this.round(); this.state = 'ready' },
@@ -1154,8 +1154,8 @@ const Mole = {
     c.globalAlpha = 1;
     if (this.red > 0){ c.fillStyle = `rgba(255,111,97,${this.red})`; c.fillRect(0,0,W,H) }
     if (this.state==='ready') banner(c,W,H,'ATRAPA EL TOPO',[`Consigue ${this.target} puntos en 25 segundos`,'Toca para empezar'],'#e0a46b');
-    if (this.state==='next') banner(c,W,H,`¬°NIVEL ${this.L} SUPERADO!`,[`${this.got} de ${this.target} puntos`,`Siguiente meta: ${this.target+50} ¬∑ topos m√°s r√°pidos`,'Toca para seguir'],C.sun);
-    if (this.state==='over') banner(c,W,H,'¬°TIEMPO!',[`${Math.max(0,this.got)} de ${this.target} puntos en el nivel ${this.L}`,'Toca para volver a empezar'],C.coral);
+    if (this.state==='next') banner(c,W,H,`¡NIVEL ${this.L} SUPERADO!`,[`${this.got} de ${this.target} puntos`,`Siguiente meta: ${this.target+50} · topos más rápidos`,'Toca para seguir'],C.sun);
+    if (this.state==='over') banner(c,W,H,'¡TIEMPO!',[`${Math.max(0,this.got)} de ${this.target} puntos en el nivel ${this.L}`,'Toca para volver a empezar'],C.coral);
   }
 };
 
