@@ -27,7 +27,7 @@ body{
   padding-block:28px 48px;
   background-image:radial-gradient(circle at 1px 1px,#ffffff10 1px,transparent 0); background-size:22px 22px;
 }
-.wrap{max-width:980px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:32px}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:3px solid var(--sun);outline-offset:3px}
 
@@ -40,14 +40,14 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,8vw,72px);lin
 .lede{color:var(--muted);max-width:60ch;margin:0;font-size:17px}
 
 /* Cartuchos */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,210px),1fr));gap:18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr));gap:18px}
 .cart{--c:var(--sun);display:flex;flex-direction:column;text-align:left;padding:0;border:0;border-radius:14px;overflow:hidden;
   background:var(--panel);box-shadow:inset 0 0 0 2px var(--line);transition:transform .15s ease,box-shadow .15s ease}
 .cart:hover,.cart:focus-visible{transform:translateY(-4px);box-shadow:inset 0 0 0 3px var(--c),0 14px 30px #0006}
-.thumb{display:block;width:100%;height:auto;aspect-ratio:4/3;max-width:100%;border-bottom:3px solid var(--c)}
-.cart-body{display:flex;flex-direction:column;gap:6px;padding:14px 16px 16px}
-.cart-name{font-family:var(--display);font-size:22px;color:var(--c);line-height:1.1}
-.cart-desc{color:var(--muted);font-size:15px;line-height:1.4}
+.thumb{display:block;width:100%;height:auto;aspect-ratio:4/3;max-width:100%;border-bottom:3px solid var(--c);background:#120f26}
+.cart-body{display:flex;flex-direction:column;gap:6px;padding:14px 16px 16px;flex:1}
+.cart-name{font-family:var(--display);font-size:21px;color:var(--c);line-height:1.1}
+.cart-desc{color:var(--muted);font-size:15px;line-height:1.4;flex:1}
 .cart-meta{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-top:4px;font-size:13px}
 .chip{font-family:var(--pixel);font-size:9px;letter-spacing:.06em;padding:6px 8px;border-radius:6px;background:var(--panel-2);color:var(--ink);font-variant-numeric:tabular-nums}
 .chip b{color:var(--c);font-weight:400}
@@ -66,12 +66,13 @@ h1{font-family:var(--display);font-weight:400;font-size:clamp(34px,8vw,72px);lin
 #cv{display:block;max-width:100%;height:auto;border-radius:12px;border:4px solid var(--c,var(--sun));
   box-shadow:0 0 0 6px var(--panel),0 22px 50px #0008;touch-action:none;user-select:none;-webkit-user-select:none;background:#120f26}
 .pad{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;width:100%;max-width:420px}
+.pad:empty{display:none}
 .pad.dpad{display:grid;grid-template-columns:repeat(3,72px);grid-template-areas:". up ." "left down right";justify-content:center}
 .pad button{min-height:56px;min-width:64px;padding:0 16px;border:0;border-radius:12px;background:var(--panel-2);
   box-shadow:inset 0 -4px 0 #0005,inset 0 0 0 2px var(--line);font-family:var(--pixel);font-size:13px;touch-action:none;user-select:none;-webkit-user-select:none}
 .pad button:active{transform:translateY(2px);box-shadow:inset 0 -2px 0 #0005,inset 0 0 0 2px var(--c,var(--sun))}
 .pad button.wide{flex:1}
-.hint{color:var(--muted);font-size:14px;text-align:center;margin:0;max-width:52ch}
+.hint{color:var(--muted);font-size:14px;text-align:center;margin:0;max-width:56ch}
 kbd{font-family:var(--pixel);font-size:10px;background:var(--panel-2);padding:3px 6px;border-radius:5px;color:var(--ink)}
 footer{color:var(--muted);font-size:13px}
 @media (prefers-reduced-motion:reduce){.coin{animation:none}.cart{transition:none}.cart:hover{transform:none}}
@@ -84,42 +85,9 @@ footer{color:var(--muted);font-size:13px}
     <header class="marquee">
       <span class="coin">INSERTA MONEDA ▸ 1 CRÉDITO</span>
       <h1>Arcade de Bolsillo</h1>
-      <p class="lede">Cuatro clásicos para jugar en el navegador, con teclado o con el dedo. Tus récords se guardan en este dispositivo.</p>
+      <p class="lede">Diez clásicos para jugar en el navegador, con teclado o con el dedo. Tus récords se guardan en este dispositivo.</p>
     </header>
-    <div class="grid">
-      <button class="cart" data-game="flappy" style="--c:var(--sun)">
-        <canvas class="thumb" width="360" height="270"></canvas>
-        <span class="cart-body">
-          <span class="cart-name">Flappy</span>
-          <span class="cart-desc">Aletea entre las tuberías sin tocar nada. Parece fácil.</span>
-          <span class="cart-meta"><span class="keys">Espacio o toque</span><span class="chip">REC <b data-best="flappy">0</b></span></span>
-        </span>
-      </button>
-      <button class="cart" data-game="tetris" style="--c:var(--violet)">
-        <canvas class="thumb" width="360" height="270"></canvas>
-        <span class="cart-body">
-          <span class="cart-name">Tetris</span>
-          <span class="cart-desc">Encaja las piezas y completa líneas. Cada 10 líneas sube el nivel.</span>
-          <span class="cart-meta"><span class="keys">Flechas y Espacio</span><span class="chip">REC <b data-best="tetris">0</b></span></span>
-        </span>
-      </button>
-      <button class="cart" data-game="snake" style="--c:var(--teal)">
-        <canvas class="thumb" width="360" height="270"></canvas>
-        <span class="cart-body">
-          <span class="cart-name">Serpiente</span>
-          <span class="cart-desc">Come manzanas, crece y no te muerdas la cola.</span>
-          <span class="cart-meta"><span class="keys">Flechas o deslizar</span><span class="chip">REC <b data-best="snake">0</b></span></span>
-        </span>
-      </button>
-      <button class="cart" data-game="2048" style="--c:var(--coral)">
-        <canvas class="thumb" width="360" height="270"></canvas>
-        <span class="cart-body">
-          <span class="cart-name">2048</span>
-          <span class="cart-desc">Desliza y junta números iguales hasta llegar a 2048.</span>
-          <span class="cart-meta"><span class="keys">Flechas o deslizar</span><span class="chip">REC <b data-best="2048">0</b></span></span>
-        </span>
-      </button>
-    </div>
+    <div class="grid" id="grid"></div>
     <footer><kbd>P</kbd> pausa · <kbd>Esc</kbd> vuelve al menú</footer>
   </section>
 
@@ -144,6 +112,8 @@ const $ = s => document.querySelector(s);
 const PIX = n => `${n}px "Press Start 2P", ui-monospace, monospace`;
 const BODY = n => `600 ${n}px "Chakra Petch", system-ui, sans-serif`;
 const C = {bg:'#17142e',deep:'#120f26',panel:'#221d45',panel2:'#2c2659',line:'#3b3478',ink:'#f4efff',muted:'#a79fd6',sun:'#ffcf3f',coral:'#ff6f61',teal:'#35d0c6',violet:'#c46bff'};
+const held = new Set();
+const clamp = (v,a,b) => Math.max(a, Math.min(b, v));
 
 const store = {
   get(k){ try { return +localStorage.getItem('arcade:'+k) || 0 } catch(e){ return 0 } },
@@ -169,9 +139,121 @@ function rr(c, x, y, w, h, r){
   c.fill();
 }
 
+/* ---------- GEOMETRY DASH ---------- */
+const Dash = {
+  id:'dash', name:'Geometry Dash', w:480, h:300, color:'#ff5fa2', thumbY:0, tapOnDown:true,
+  desc:'Salta al ritmo, esquiva los pinchos y sube a los bloques. ¿Hasta dónde llegas?', keys:'Espacio o toque',
+  pad:[{a:'action', l:'Saltar', wide:true, held:1}],
+  hint:'<kbd>Espacio</kbd>, <kbd>↑</kbd>, clic o toque para saltar. Mantén pulsado para encadenar saltos.',
+  G:240, S:28, X:110, attempt:1,
+  reset(){ Object.assign(this,{state:'ready',dist:0,y:this.G-this.S,vy:0,rot:0,ground:true,obs:[],next:620,queued:0,parts:[],t:0,score:0}) },
+  demo(){
+    this.reset(); this.state='play';
+    this.col(200,1); this.col(230,2); this.col(260,2); this.spike(330); this.spike(360);
+    this.y = this.G - this.S - 70; this.rot = .5; this.ground = false;
+  },
+  spike(x){ this.obs.push({k:'s', x, y:this.G-30, w:30, h:30}) },
+  col(x,n){ this.obs.push({k:'b', x, y:this.G-30*n, w:30, h:30*n}) },
+  gen(){
+    const B = 30;
+    while (this.next < this.dist + this.w + 120){
+      const x = this.next, r = Math.random(), lvl = Math.min(1, this.dist/6000);
+      let len;
+      if (r < .25){ this.spike(x); len = B }
+      else if (r < .42){ this.spike(x); this.spike(x+B); len = 2*B }
+      else if (r < .52 && lvl > .15){ for (let i=0;i<3;i++) this.spike(x+i*B); len = 3*B }
+      else if (r < .68){ this.col(x,1); this.col(x+B,1); this.spike(x+2*B); this.spike(x+3*B); len = 4*B }
+      else if (r < .84){ this.col(x,1); this.col(x+B,2); this.col(x+2*B,2); len = 3*B }
+      else { this.col(x,1); this.obs.push({k:'b', x:x+3*B, y:this.G-60, w:5*B, h:14}); for (let i=2;i<8;i++) this.spike(x+i*B); len = 8*B }
+      this.next = x + len + 210 + Math.random()*170 - lvl*60;
+    }
+    this.obs = this.obs.filter(o => o.x + o.w > this.dist - 60);
+  },
+  input(a){
+    if (!['action','tap','up'].includes(a)) return;
+    if (this.state==='over'){ if (this.t > .5){ this.attempt++; this.reset(); this.state='play' } return }
+    if (this.state==='ready') this.state='play';
+    this.queued = .15;
+  },
+  die(){
+    this.state='over'; this.t=0;
+    for (let i=0;i<26;i++){ const a=Math.random()*7, s=80+Math.random()*260;
+      this.parts.push({x:this.dist+this.X+this.S/2, y:this.y+this.S/2, vx:Math.cos(a)*s, vy:Math.sin(a)*s-120, life:.5+Math.random()*.4, col:i%2?C.sun:C.teal}) }
+  },
+  update(dt){
+    for (const p of this.parts){ p.x += p.vx*dt; p.y += p.vy*dt; p.vy += 900*dt; p.life -= dt }
+    this.parts = this.parts.filter(p => p.life > 0);
+    if (this.state==='ready') return;
+    if (this.state==='over'){ this.t += dt; return }
+    const S = this.S, sp = 270 + Math.min(130, this.dist/60);
+    this.dist += sp*dt; this.score = Math.floor(this.dist/50);
+    this.gen();
+    this.queued = Math.max(0, this.queued - dt);
+    const wants = held.has('action') || held.has('up') || held.has('ptr') || this.queued > 0;
+    if (this.ground && wants){ this.vy = -640; this.ground = false; this.queued = 0 }
+    const prevB = this.y + S;
+    this.vy += 2300*dt; this.y += this.vy*dt;
+    this.ground = false;
+    if (this.y + S >= this.G){ this.y = this.G - S; this.vy = 0; this.ground = true }
+    const cx = this.dist + this.X;
+    for (const o of this.obs){
+      if (o.x > cx + S || o.x + o.w < cx) continue;
+      if (o.k==='b'){
+        if (cx + S > o.x + 2 && cx < o.x + o.w - 2){
+          if (prevB <= o.y + 1 && this.y + S >= o.y){ this.y = o.y - S; this.vy = 0; this.ground = true }
+          else if (this.y + S > o.y + 3 && this.y < o.y + o.h) return this.die();
+        }
+      } else if (cx + S > o.x + 9 && cx < o.x + 21 && this.y + S > o.y + 10) return this.die();
+    }
+    const q = Math.PI/2;
+    if (this.ground){
+      this.rot = Math.round(this.rot/q)*q;
+      if (Math.random() < .5) this.parts.push({x:cx+2, y:this.y+S-3, vx:-60-Math.random()*60, vy:-Math.random()*60, life:.25, col:C.sun});
+    } else this.rot += 5.6*dt;
+  },
+  draw(c){
+    const W=this.w, H=this.h, G=this.G, cam=this.dist, S=this.S;
+    const hue = (230 + this.dist/25) % 360;
+    const g = c.createLinearGradient(0,0,0,G); g.addColorStop(0,`hsl(${hue},55%,20%)`); g.addColorStop(1,`hsl(${(hue+30)%360},60%,36%)`);
+    c.fillStyle = g; c.fillRect(0,0,W,G);
+    c.fillStyle = 'rgba(255,255,255,.06)';
+    for (let i=0;i<8;i++){ const s = 50 + (i*37)%40, span = W+200; const x = (((i*130 - cam*.3) % span) + span) % span - 100; c.fillRect(x, 30+(i*53)%120, s, s) }
+    c.fillStyle = `hsl(${hue},55%,13%)`; c.fillRect(0,G,W,H-G);
+    c.strokeStyle = 'rgba(255,255,255,.12)'; c.lineWidth = 2;
+    for (let x = -(cam % 60); x < W; x += 60) c.strokeRect(x, G+2, 60, H-G);
+    c.fillStyle = '#fff'; c.fillRect(0,G,W,2);
+    for (const o of this.obs){
+      const x = o.x - cam; if (x > W || x + o.w < 0) continue;
+      if (o.k==='b'){
+        c.fillStyle = C.deep; c.fillRect(x, o.y, o.w, o.h);
+        c.strokeStyle = '#fff'; c.lineWidth = 2; c.strokeRect(x+1, o.y+1, o.w-2, o.h-2);
+        if (o.h > 20){ c.strokeStyle = 'rgba(255,255,255,.3)'; for (let yy=o.y; yy<o.y+o.h; yy+=30) for (let xx=x; xx<x+o.w; xx+=30) c.strokeRect(xx+7, yy+7, 16, 16) }
+      } else {
+        c.fillStyle = C.deep; c.beginPath(); c.moveTo(x+1, o.y+30); c.lineTo(x+15, o.y+1); c.lineTo(x+29, o.y+30); c.closePath(); c.fill();
+        c.strokeStyle = '#fff'; c.lineWidth = 2; c.stroke();
+      }
+    }
+    for (const p of this.parts){ c.globalAlpha = clamp(p.life*2,0,1); c.fillStyle = p.col; c.fillRect(p.x-cam-3, p.y-3, 6, 6) }
+    c.globalAlpha = 1;
+    if (this.state!=='over'){
+      c.save(); c.translate(this.X+S/2, this.y+S/2); c.rotate(this.rot);
+      c.fillStyle = C.sun; c.fillRect(-S/2,-S/2,S,S);
+      c.strokeStyle = C.deep; c.lineWidth = 3; c.strokeRect(-S/2+1.5,-S/2+1.5,S-3,S-3);
+      c.fillStyle = C.teal; c.fillRect(-8,-8,16,16);
+      c.fillStyle = C.deep; c.fillRect(-5,-4,3,5); c.fillRect(2,-4,3,5);
+      c.restore();
+    }
+    label(c, `INTENTO ${this.attempt}`, 14, 22, 10, '#fff', 'left');
+    label(c, `${this.score} m`, W-14, 22, 12, '#fff', 'right');
+    if (this.state==='ready') banner(c,W,H,'GEOMETRY DASH',['Toca o pulsa Espacio para saltar','Mantén pulsado para encadenar saltos'],'#ff5fa2');
+    if (this.state==='over' && this.t > .3) banner(c,W,H,'¡CRASH!',[`${this.score} metros en el intento ${this.attempt}`,'Toca o pulsa Espacio para reintentar'],C.coral);
+  }
+};
+
 /* ---------- FLAPPY ---------- */
 const Flappy = {
   id:'flappy', name:'Flappy', w:360, h:540, color:C.sun, tapOnDown:true, thumbY:150,
+  desc:'Aletea entre las tuberías sin tocar nada. Parece fácil.', keys:'Espacio o toque',
   pad:[{a:'action', l:'Aletear', wide:true}],
   hint:'<kbd>Espacio</kbd>, <kbd>↑</kbd>, clic o toque en la pantalla para aletear.',
   GAP:150, PW:56,
@@ -250,6 +332,7 @@ function block(c,x,y,s,col){
 }
 const Tetris = {
   id:'tetris', name:'Tetris', w:360, h:480, color:C.violet, repeatOK:true, thumbY:210,
+  desc:'Encaja las piezas y completa líneas. Cada 10 líneas sube el nivel.', keys:'Flechas y Espacio',
   swipe:{down:'drop', up:'rot'},
   pad:[{a:'left',l:'←',hold:1},{a:'rot',l:'↻'},{a:'right',l:'→',hold:1},{a:'down',l:'↓',hold:1},{a:'drop',l:'Soltar'}],
   hint:'<kbd>← →</kbd> mover · <kbd>↑</kbd> girar · <kbd>↓</kbd> bajar · <kbd>Espacio</kbd> soltar. En móvil: toca para girar, desliza para mover.',
@@ -352,6 +435,7 @@ const Tetris = {
 /* ---------- SERPIENTE ---------- */
 const Snake = {
   id:'snake', name:'Serpiente', w:360, h:360, color:C.teal, thumbY:45, N:18, S:20,
+  desc:'Come manzanas, crece y no te muerdas la cola.', keys:'Flechas o deslizar',
   pad:[{a:'up',l:'↑',area:'up'},{a:'left',l:'←',area:'left'},{a:'down',l:'↓',area:'down'},{a:'right',l:'→',area:'right'}], dpad:true,
   hint:'<kbd>Flechas</kbd> o <kbd>WASD</kbd> para girar. En móvil, desliza sobre la pantalla.',
   reset(){
@@ -422,6 +506,7 @@ function slide(row){
 }
 const G2048 = {
   id:'2048', name:'2048', w:360, h:360, color:C.coral, thumbY:45,
+  desc:'Desliza y junta números iguales hasta llegar a 2048.', keys:'Flechas o deslizar',
   pad:[{a:'up',l:'↑',area:'up'},{a:'left',l:'←',area:'left'},{a:'down',l:'↓',area:'down'},{a:'right',l:'→',area:'right'}], dpad:true,
   hint:'<kbd>Flechas</kbd> o <kbd>WASD</kbd> para deslizar todas las fichas. Dos fichas iguales se suman al chocar.',
   reset(){ this.g=[...Array(4)].map(()=>Array(4).fill(0)); this.score=0; this.state='play'; this.won=false; this.born=[]; this.add(); this.add() },
@@ -478,17 +563,380 @@ const G2048 = {
   }
 };
 
-const GAMES = {flappy:Flappy, tetris:Tetris, snake:Snake, '2048':G2048};
+/* ---------- INVASORES ---------- */
+const ALIEN = [['0011100','0111110','1101011','1111111','0101010','1000001'],['0011100','0111110','1101011','1111111','0101010','0100010']];
+const AC = [C.coral,'#ff9f43',C.sun,'#6be37a',C.teal];
+const Invaders = {
+  id:'invaders', name:'Invasores', w:360, h:480, color:'#6be37a', thumbY:40, noSwipe:true,
+  desc:'Defiende la Tierra de oleadas de marcianos que bajan cada vez más rápido.', keys:'Flechas y Espacio',
+  pad:[{a:'left',l:'←',held:1},{a:'action',l:'Disparar',held:1},{a:'right',l:'→',held:1}],
+  hint:'<kbd>← →</kbd> para moverte y <kbd>Espacio</kbd> para disparar. Con ratón o dedo: arrastra para moverte y mantén pulsado para disparar.',
+  reset(){ Object.assign(this,{sx:165,lives:3,score:0,wave:1,state:'ready',shots:[],bombs:[],cool:0,inv:0,boom:[]}); this.spawnWave() },
+  spawnWave(){
+    this.al = [];
+    for (let r=0;r<5;r++) for (let c=0;c<8;c++) this.al.push({x:28+c*36, y:70+r*30+Math.min(60,(this.wave-1)*12), r});
+    this.dir = 1; this.stepT = 0; this.frame = 0;
+  },
+  demo(){
+    this.reset(); this.state='play'; this.score=340;
+    this.al = this.al.filter((a,i) => ![3,10,11,20,26,33].includes(i));
+    this.shots = [{x:180,y:330}]; this.bombs = [{x:110,y:380}]; this.sx = 165;
+  },
+  input(a){
+    if (this.state==='over'){ if (a==='action'||a==='tap'){ this.reset(); this.state='play' } return }
+    if (this.state==='ready') this.state='play';
+  },
+  drag(x,y,down){ this.sx = clamp(x-15, 6, this.w-36); if (down && this.state==='ready') this.state='play' },
+  update(dt){
+    for (const b of this.boom) b.t -= dt;
+    this.boom = this.boom.filter(b => b.t > 0);
+    if (this.state!=='play') return;
+    if (held.has('left')) this.sx -= 220*dt;
+    if (held.has('right')) this.sx += 220*dt;
+    this.sx = clamp(this.sx, 6, this.w-36);
+    this.cool -= dt; this.inv = Math.max(0, this.inv-dt);
+    if ((held.has('action') || held.has('ptr')) && this.cool <= 0 && this.shots.length < 2){ this.shots.push({x:this.sx+15, y:432}); this.cool = .3 }
+    for (const s of this.shots) s.y -= 440*dt;
+    for (const b of this.bombs) b.y += (200 + this.wave*15)*dt;
+    this.bombs = this.bombs.filter(b => b.y < this.h);
+    this.stepT -= dt;
+    if (this.stepT <= 0){
+      this.stepT = Math.max(.06, .55 - (40-this.al.length)*.012 - (this.wave-1)*.05);
+      this.frame ^= 1;
+      const edge = this.al.some(a => (this.dir>0 && a.x+29 > this.w-8) || (this.dir<0 && a.x-8 < 8));
+      if (edge){ this.dir *= -1; this.al.forEach(a => a.y += 14) } else this.al.forEach(a => a.x += 8*this.dir);
+    }
+    if (this.al.length && Math.random() < dt*(.8 + this.wave*.3)){
+      const cols = {};
+      this.al.forEach(a => { const k = Math.round(a.x); if (!cols[k] || cols[k].y < a.y) cols[k] = a });
+      const sh = Object.values(cols), s = sh[Math.random()*sh.length|0];
+      this.bombs.push({x:s.x+10, y:s.y+18});
+    }
+    for (const s of this.shots) for (const a of this.al)
+      if (!a.dead && s.y > -10 && s.x > a.x-1 && s.x < a.x+22 && s.y > a.y && s.y < a.y+18){
+        a.dead = 1; s.y = -99; this.score += (5-a.r)*10; this.boom.push({x:a.x+10, y:a.y+9, t:.25, col:AC[a.r]});
+      }
+    this.al = this.al.filter(a => !a.dead); this.shots = this.shots.filter(s => s.y > -10);
+    for (const b of this.bombs)
+      if (this.inv <= 0 && b.x > this.sx && b.x < this.sx+30 && b.y > 432 && b.y < 454){
+        b.y = 999; this.lives--; this.inv = 1.5; this.boom.push({x:this.sx+15, y:444, t:.4, col:C.coral});
+        if (this.lives <= 0) this.state = 'over';
+      }
+    if (this.al.some(a => a.y+18 >= 428)) this.state = 'over';
+    if (!this.al.length){ this.wave++; this.spawnWave(); this.bombs = []; this.shots = [] }
+  },
+  draw(c){
+    const W=this.w, H=this.h;
+    c.fillStyle = C.deep; c.fillRect(0,0,W,H);
+    c.fillStyle = 'rgba(255,255,255,.35)';
+    for (let i=0;i<40;i++) c.fillRect((i*97)%W, (i*61)%H, i%3?1:2, i%3?1:2);
+    const map = ALIEN[this.frame];
+    for (const a of this.al){
+      c.fillStyle = AC[a.r];
+      map.forEach((row,ry) => [...row].forEach((v,rx) => v==='1' && c.fillRect(a.x+rx*3, a.y+ry*3, 3, 3)));
+    }
+    for (const b of this.boom){ c.globalAlpha = clamp(b.t*3,0,1); c.strokeStyle = b.col; c.lineWidth = 3; c.beginPath(); c.arc(b.x, b.y, 18-b.t*30, 0, 7); c.stroke() }
+    c.globalAlpha = 1;
+    if (this.state!=='over' && !(this.inv > 0 && Math.floor(this.inv*10)%2)){
+      c.fillStyle = '#6be37a'; c.fillRect(this.sx, 444, 30, 8); c.fillRect(this.sx+4, 438, 22, 6); c.fillRect(this.sx+13, 430, 4, 8);
+    }
+    c.fillStyle = '#fff'; for (const s of this.shots) c.fillRect(s.x-1, s.y, 2, 10);
+    c.fillStyle = C.coral; for (const b of this.bombs) c.fillRect(b.x-1.5, b.y, 3, 9);
+    c.fillStyle = '#6be37a55'; c.fillRect(0, 458, W, 2);
+    label(c, `VIDAS ${this.lives}`, 12, 24, 10, C.ink, 'left');
+    label(c, `OLEADA ${this.wave}`, W-12, 24, 10, C.ink, 'right');
+    if (this.state==='ready') banner(c,W,H,'INVASORES',['Muévete con ← → y dispara con Espacio','o arrastra y mantén pulsado'],'#6be37a');
+    if (this.state==='over') banner(c,W,H,'INVASIÓN',[`${this.score} puntos · oleada ${this.wave}`,'Toca o pulsa Espacio para reintentar'],C.coral);
+  }
+};
+
+/* ---------- ROMPELADRILLOS ---------- */
+const Breakout = {
+  id:'breakout', name:'Rompeladrillos', w:360, h:480, color:'#ff9f43', thumbY:30, noSwipe:true, PW:70, PY:440,
+  desc:'Rebota la bola con la pala y rompe todos los ladrillos sin dejarla caer.', keys:'Flechas o ratón',
+  pad:[{a:'left',l:'←',held:1},{a:'action',l:'Lanzar'},{a:'right',l:'→',held:1}],
+  hint:'<kbd>← →</kbd>, el ratón o el dedo para mover la pala. <kbd>Espacio</kbd> o toque para lanzar la bola.',
+  reset(){ Object.assign(this,{px:145,lives:3,score:0,level:1,state:'ready'}); this.build(); this.stick() },
+  build(){
+    this.bricks = []; const bw = (this.w-20)/8, cols = [C.coral,'#ff9f43',C.sun,'#6be37a',C.teal,'#5b7cff'];
+    for (let r=0;r<6;r++) for (let c=0;c<8;c++) this.bricks.push({x:10+c*bw, y:60+r*20, w:bw, h:20, col:cols[r], pts:(6-r)*10});
+  },
+  stick(){ this.stuck = true; this.bx = this.px+this.PW/2; this.by = this.PY-7; this.vx = 0; this.vy = 0 },
+  launch(){ const sp = 290 + this.level*25, a = Math.random()*.6-.3; this.vx = sp*Math.sin(a); this.vy = -sp*Math.cos(a); this.stuck = false },
+  demo(){
+    this.reset(); this.state='play'; this.score=230;
+    this.bricks = this.bricks.filter((b,i) => ![2,3,4,11,12,19,27,35].includes(i));
+    this.stuck = false; this.bx = 205; this.by = 300; this.px = 120;
+  },
+  input(a){
+    if (this.state==='over'){ if (a==='action'||a==='tap'){ this.reset(); this.state='play' } return }
+    if (a==='action'||a==='tap'){ this.state='play'; if (this.stuck) this.launch() }
+  },
+  drag(x){ this.px = clamp(x-this.PW/2, 0, this.w-this.PW); if (this.stuck) this.bx = this.px+this.PW/2 },
+  update(dt){
+    if (this.state==='over') return;
+    if (held.has('left')) this.px -= 400*dt;
+    if (held.has('right')) this.px += 400*dt;
+    this.px = clamp(this.px, 0, this.w-this.PW);
+    if (this.stuck){ this.bx = this.px+this.PW/2; return }
+    const n = Math.ceil(Math.hypot(this.vx,this.vy)*dt/4);
+    for (let i=0;i<n;i++) if (this.step(dt/n)) break;
+  },
+  step(dt){
+    const R = 6;
+    this.bx += this.vx*dt; this.by += this.vy*dt;
+    if (this.bx < R){ this.bx = R; this.vx = Math.abs(this.vx) }
+    if (this.bx > this.w-R){ this.bx = this.w-R; this.vx = -Math.abs(this.vx) }
+    if (this.by < R+36){ this.by = R+36; this.vy = Math.abs(this.vy) }
+    if (this.vy > 0 && this.by+R >= this.PY && this.by-R <= this.PY+10 && this.bx >= this.px-R && this.bx <= this.px+this.PW+R){
+      const rel = clamp((this.bx-(this.px+this.PW/2))/(this.PW/2), -1, 1), sp = Math.min(560, Math.hypot(this.vx,this.vy)*1.01), a = rel*1.05;
+      this.vx = sp*Math.sin(a); this.vy = -sp*Math.cos(a); this.by = this.PY-R;
+    }
+    for (let k=0;k<this.bricks.length;k++){
+      const b = this.bricks[k];
+      if (this.bx+R > b.x && this.bx-R < b.x+b.w && this.by+R > b.y && this.by-R < b.y+b.h){
+        const ox = Math.min(this.bx+R-b.x, b.x+b.w-(this.bx-R)), oy = Math.min(this.by+R-b.y, b.y+b.h-(this.by-R));
+        if (ox < oy) this.vx = -this.vx; else this.vy = -this.vy;
+        this.bricks.splice(k,1); this.score += b.pts*this.level; break;
+      }
+    }
+    if (!this.bricks.length){ this.level++; this.build(); this.stick(); return true }
+    if (this.by > this.h+10){ this.lives--; if (this.lives <= 0) this.state = 'over'; else this.stick(); return true }
+    return false;
+  },
+  draw(c){
+    const W=this.w, H=this.h;
+    c.fillStyle = C.deep; c.fillRect(0,0,W,H);
+    c.fillStyle = C.line; c.fillRect(0,34,W,2);
+    label(c, `VIDAS ${this.lives}`, 12, 18, 10, C.ink, 'left');
+    label(c, `NIVEL ${this.level}`, W-12, 18, 10, C.ink, 'right');
+    for (const b of this.bricks){
+      c.fillStyle = b.col; rr(c, b.x+2, b.y+2, b.w-4, b.h-4, 4);
+      c.fillStyle = 'rgba(255,255,255,.28)'; c.fillRect(b.x+5, b.y+4, b.w-10, 3);
+    }
+    c.fillStyle = '#ff9f43'; rr(c, this.px, this.PY, this.PW, 10, 5);
+    c.fillStyle = '#fff'; c.beginPath(); c.arc(this.bx, this.by, 6, 0, 7); c.fill();
+    if (this.stuck && this.state==='play'){ c.font = BODY(13); c.fillStyle = C.muted; c.textAlign = 'center'; c.fillText('Toca o pulsa Espacio para lanzar', W/2, 470) }
+    if (this.state==='ready') banner(c,W,H,'ROMPELADRILLOS',['Mueve la pala con ← → o el ratón','Toca o pulsa Espacio para lanzar'],'#ff9f43');
+    if (this.state==='over') banner(c,W,H,'GAME OVER',[`${this.score} puntos · nivel ${this.level}`,'Toca o pulsa Espacio para jugar otra'],C.coral);
+  }
+};
+
+/* ---------- PONG ---------- */
+const Pong = {
+  id:'pong', name:'Pong', w:480, h:320, color:'#9fb4ff', thumbY:0, noSwipe:true, PH:64, PW:10, WIN:7,
+  desc:'El tenis de mesa original contra la máquina. Gana quien llegue antes a 7.', keys:'↑ ↓ o arrastrar',
+  pad:[{a:'up',l:'↑',held:1},{a:'down',l:'↓',held:1}],
+  hint:'<kbd>↑ ↓</kbd> o <kbd>W S</kbd> para mover tu pala, o muévela con el ratón o el dedo. Gana el primero que llegue a 7.',
+  reset(){ Object.assign(this,{py:128,cy:128,me:0,cpu:0,score:0,state:'ready'}); this.serve(1) },
+  serve(dir){ this.bx = 240; this.by = 160; const a = Math.random()*.8-.4; this.sp = 280; this.vx = Math.cos(a)*this.sp*dir; this.vy = Math.sin(a)*this.sp; this.wait = .8 },
+  demo(){ this.reset(); this.state='play'; this.me=3; this.cpu=2; this.bx=300; this.by=110; this.py=140; this.cy=80 },
+  input(a){
+    if (this.state==='over'){ if (a==='action'||a==='tap'){ this.reset(); this.state='play' } return }
+    if (this.state==='ready' && ['action','tap','up','down'].includes(a)) this.state='play';
+  },
+  drag(x,y,down){ this.py = clamp(y-this.PH/2, 0, this.h-this.PH); if (down && this.state==='ready') this.state='play' },
+  update(dt){
+    if (this.state!=='play') return;
+    const H=this.h, PH=this.PH;
+    if (held.has('up')) this.py -= 360*dt;
+    if (held.has('down')) this.py += 360*dt;
+    this.py = clamp(this.py, 0, H-PH);
+    const target = (this.vx > 0 ? this.by : H/2) - PH/2, cs = 230*dt;
+    this.cy = clamp(this.cy + clamp(target-this.cy, -cs, cs), 0, H-PH);
+    if (this.wait > 0){ this.wait -= dt; return }
+    this.bx += this.vx*dt; this.by += this.vy*dt;
+    if (this.by < 6){ this.by = 6; this.vy = Math.abs(this.vy) }
+    if (this.by > H-6){ this.by = H-6; this.vy = -Math.abs(this.vy) }
+    if (this.vx < 0 && this.bx-6 < 30 && this.bx > 14 && this.by > this.py-6 && this.by < this.py+PH+6) this.hit(this.py, 1);
+    if (this.vx > 0 && this.bx+6 > this.w-30 && this.bx < this.w-14 && this.by > this.cy-6 && this.by < this.cy+PH+6) this.hit(this.cy, -1);
+    if (this.bx < -10){ this.cpu++; this.point(1) }
+    else if (this.bx > this.w+10){ this.me++; this.score = this.me; this.point(-1) }
+  },
+  hit(py, dir){
+    const rel = (this.by-(py+this.PH/2))/(this.PH/2);
+    this.sp = Math.min(620, this.sp*1.06);
+    this.vx = Math.cos(rel)*this.sp*dir; this.vy = Math.sin(rel)*this.sp;
+    this.bx = dir > 0 ? 36 : this.w-36;
+  },
+  point(dir){ if (this.me >= this.WIN || this.cpu >= this.WIN){ this.state = 'over'; return } this.serve(dir) },
+  draw(c){
+    const W=this.w, H=this.h;
+    c.fillStyle = C.deep; c.fillRect(0,0,W,H);
+    c.fillStyle = C.line; for (let y=8;y<H;y+=24) c.fillRect(W/2-2, y, 4, 12);
+    label(c, String(this.me), W/2-50, 36, 24, '#9fb4ff');
+    label(c, String(this.cpu), W/2+50, 36, 24, C.coral);
+    c.font = PIX(8); c.fillStyle = C.muted; c.textAlign = 'center'; c.fillText('TU', W/2-50, 64); c.fillText('CPU', W/2+50, 64);
+    c.fillStyle = '#9fb4ff'; rr(c, 20, this.py, this.PW, this.PH, 4);
+    c.fillStyle = C.coral; rr(c, W-30, this.cy, this.PW, this.PH, 4);
+    c.fillStyle = C.ink; c.fillRect(this.bx-6, this.by-6, 12, 12);
+    if (this.state==='ready') banner(c,W,H,'PONG',['Mueve tu pala con ↑ ↓, el ratón o el dedo','Toca o pulsa Espacio para empezar'],'#9fb4ff');
+    if (this.state==='over') banner(c,W,H,this.me>=this.WIN?'¡HAS GANADO!':'HAS PERDIDO',[`Tú ${this.me} – ${this.cpu} CPU`,'Toca o pulsa Espacio para jugar otra'],this.me>=this.WIN?C.sun:C.coral);
+  }
+};
+
+/* ---------- BUSCAMINAS ---------- */
+const NUMC = [null,'#5b7cff','#6be37a',C.coral,C.violet,'#ff9f43',C.teal,C.ink,C.muted];
+const Mines = {
+  id:'mines', name:'Buscaminas', w:360, h:382, color:'#5b7cff', thumbY:56, noSwipe:true, M:10, S:36, OX:18, OY:40,
+  desc:'Abre casillas sin pisar ninguna de las 10 minas. Los números te dan las pistas.', keys:'Clic o toque',
+  pad:[{a:'flagmode', l:'Cambiar modo', wide:true}],
+  hint:'Toca o haz clic para abrir. Clic derecho, pulsación larga o el modo bandera para marcar minas. Teclado: flechas, <kbd>Espacio</kbd> abre y <kbd>F</kbd> marca.',
+  reset(){ this.g = [...Array(81)].map(() => ({m:0,n:0,o:0,f:0})); Object.assign(this,{placed:false,state:'play',score:0,cx:4,cy:4,flagMode:false,time:0,boom:-1,kb:false}) },
+  demo(){ this.reset(); this.open(40); this.g.forEach((q,i) => { if (q.m && i%3===0) q.f = 1 }) },
+  nb(i){
+    const x = i%9, y = i/9|0, out = [];
+    for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++){ const X=x+dx, Y=y+dy; if ((dx||dy) && X>=0 && Y>=0 && X<9 && Y<9) out.push(Y*9+X) }
+    return out;
+  },
+  place(safe){
+    const ban = new Set([safe, ...this.nb(safe)]); let k = 0;
+    while (k < this.M){ const i = Math.random()*81|0; if (this.g[i].m || ban.has(i)) continue; this.g[i].m = 1; k++ }
+    this.g.forEach((q,i) => q.n = this.nb(i).filter(j => this.g[j].m).length);
+    this.placed = true;
+  },
+  open(i){
+    const c = this.g[i]; if (c.o || c.f) return;
+    if (!this.placed) this.place(i);
+    if (c.m){ this.boom = i; this.state = 'over'; this.g.forEach(q => { if (q.m) q.o = 1 }); this.endT = performance.now(); return }
+    const st = [i];
+    while (st.length){ const k = st.pop(), q = this.g[k]; if (q.o || q.f) continue; q.o = 1; this.score++; if (!q.n) this.nb(k).forEach(j => { if (!this.g[j].o) st.push(j) }) }
+    if (this.score === 81-this.M){ this.state = 'won'; this.g.forEach(q => { if (q.m) q.f = 1 }); this.endT = performance.now() }
+  },
+  flag(i){ const c = this.g[i]; if (!c.o) c.f ^= 1 },
+  click(x,y,o){
+    if (this.state!=='play'){ if (performance.now()-this.endT > 500) this.reset(); return }
+    const cx = Math.floor((x-this.OX)/this.S), cy = Math.floor((y-this.OY)/this.S);
+    if (cx<0 || cy<0 || cx>8 || cy>8) return;
+    const i = cy*9+cx; this.cx = cx; this.cy = cy; this.kb = false;
+    if (o.right || o.long || this.flagMode) this.flag(i); else this.open(i);
+  },
+  input(a){
+    if (this.state!=='play'){ if (a==='action') this.reset(); return }
+    const D = {left:[-1,0],right:[1,0],up:[0,-1],down:[0,1]}[a];
+    if (D){ this.kb = true; this.cx = clamp(this.cx+D[0],0,8); this.cy = clamp(this.cy+D[1],0,8) }
+    if (a==='action'){ this.kb = true; this.open(this.cy*9+this.cx) }
+    if (a==='flag'){ this.kb = true; this.flag(this.cy*9+this.cx) }
+    if (a==='flagmode') this.flagMode = !this.flagMode;
+  },
+  update(dt){ if (this.placed && this.state==='play') this.time += dt },
+  draw(c){
+    const S = this.S;
+    c.fillStyle = C.deep; c.fillRect(0,0,this.w,this.h);
+    const flags = this.g.filter(q => q.f).length;
+    c.font = PIX(10); c.textBaseline = 'middle';
+    c.textAlign = 'left'; c.fillStyle = C.coral; c.fillText(`MINAS ${this.M-flags}`, this.OX, 20);
+    c.textAlign = 'center'; c.fillStyle = this.flagMode ? C.sun : C.muted; c.fillText(this.flagMode ? 'MODO BANDERA' : 'MODO ABRIR', this.w/2, 20);
+    c.textAlign = 'right'; c.fillStyle = C.ink; c.fillText(String(Math.floor(this.time)).padStart(3,'0'), this.w-this.OX, 20);
+    this.g.forEach((q,i) => {
+      const x = this.OX+(i%9)*S, y = this.OY+(i/9|0)*S;
+      if (!q.o){
+        c.fillStyle = C.panel2; rr(c, x+1, y+1, S-2, S-2, 6);
+        c.fillStyle = 'rgba(255,255,255,.08)'; c.fillRect(x+5, y+4, S-10, 3);
+        if (q.f){ c.fillStyle = C.ink; c.fillRect(x+14, y+9, 3, 19); c.fillStyle = C.coral; c.beginPath(); c.moveTo(x+17,y+9); c.lineTo(x+28,y+14); c.lineTo(x+17,y+19); c.closePath(); c.fill() }
+      } else {
+        c.fillStyle = i===this.boom ? C.coral : '#1b1740'; c.fillRect(x+1, y+1, S-2, S-2);
+        if (q.m){ c.fillStyle = C.deep; c.beginPath(); c.arc(x+S/2, y+S/2, 8, 0, 7); c.fill(); c.strokeStyle = C.ink; c.lineWidth = 2; c.stroke() }
+        else if (q.n){ c.font = PIX(14); c.textAlign = 'center'; c.fillStyle = NUMC[q.n]; c.fillText(String(q.n), x+S/2+1, y+S/2+2) }
+      }
+    });
+    if (this.kb && this.state==='play'){ c.strokeStyle = C.sun; c.lineWidth = 2; c.strokeRect(this.OX+this.cx*S+1, this.OY+this.cy*S+1, S-2, S-2) }
+    if (this.state==='won') banner(c,this.w,this.h,'¡DESPEJADO!',[`En ${Math.round(this.time)} segundos`,'Toca para jugar otra'],C.sun);
+    if (this.state==='over') banner(c,this.w,this.h,'¡BOOM!',['Has pisado una mina','Toca para jugar otra'],C.coral);
+  }
+};
+
+/* ---------- ATRAPA EL TOPO ---------- */
+const Mole = {
+  id:'mole', name:'Atrapa el Topo', w:360, h:400, color:'#e0a46b', thumbY:70,
+  desc:'Golpea todos los topos que puedas en 30 segundos. Los dorados valen el triple.', keys:'Clic o toque',
+  pad:[],
+  hint:'Toca o haz clic en los topos. Con teclado, las teclas <kbd>1</kbd> a <kbd>9</kbd> golpean cada agujero (1 arriba a la izquierda).',
+  reset(){ Object.assign(this,{holes:[...Array(9)].map(() => ({up:0,t:0,dur:1,gold:0})), score:0, time:30, state:'ready', spawn:0, pops:[], endT:0}) },
+  demo(){
+    this.reset(); this.state='play'; this.time=18; this.score=120;
+    Object.assign(this.holes[1],{up:1,t:.3,dur:1}); Object.assign(this.holes[3],{up:1,t:.3,dur:1,gold:1}); Object.assign(this.holes[8],{up:1,t:.3,dur:1});
+  },
+  pos(i){ return {x:60+(i%3)*120, y:150+(i/3|0)*100} },
+  start(){ this.reset(); this.state='play' },
+  whack(i){
+    const o = this.holes[i]; if (!o.up || o.t > o.dur-.04) return;
+    const p = this.pos(i), pts = o.gold ? 30 : 10;
+    this.score += pts; o.up = 0; this.pops.push({x:p.x, y:p.y-70, t:.6, txt:'+'+pts});
+  },
+  press(x,y){
+    if (this.state!=='play'){ if (this.state==='ready' || performance.now()-this.endT > 600) this.start(); return }
+    for (let i=0;i<9;i++){ const p = this.pos(i); if (Math.abs(x-p.x) < 50 && y > p.y-95 && y < p.y+22){ this.whack(i); return } }
+  },
+  input(a){
+    if (this.state!=='play'){ if ((a==='action'||a==='tap') && (this.state==='ready' || performance.now()-this.endT > 600)) this.start(); return }
+    const m = /^n(\d)$/.exec(a); if (m) this.whack(+m[1]-1);
+  },
+  update(dt){
+    for (const p of this.pops){ p.y -= 40*dt; p.t -= dt }
+    this.pops = this.pops.filter(p => p.t > 0);
+    if (this.state!=='play') return;
+    this.time -= dt;
+    if (this.time <= 0){ this.time = 0; this.state = 'over'; this.endT = performance.now(); this.holes.forEach(o => o.up = 0); return }
+    this.holes.forEach(o => { if (o.up){ o.t += dt; if (o.t >= o.dur) o.up = 0 } });
+    this.spawn -= dt;
+    if (this.spawn <= 0){
+      const free = this.holes.filter(o => !o.up);
+      if (free.length) Object.assign(free[Math.random()*free.length|0], {up:1, t:0, dur:Math.max(.5, 1.15-(30-this.time)*.02), gold:Math.random() < .1});
+      this.spawn = .3 + Math.random()*.45;
+    }
+  },
+  draw(c){
+    const W=this.w, H=this.h;
+    const g = c.createLinearGradient(0,0,0,H); g.addColorStop(0,'#2b2370'); g.addColorStop(1,'#1d3a3a');
+    c.fillStyle = g; c.fillRect(0,0,W,H);
+    label(c, `TIEMPO ${Math.ceil(this.time)}`, 14, 26, 11, this.time < 6 && this.state==='play' ? C.coral : C.ink, 'left');
+    this.holes.forEach((o,i) => {
+      const {x,y} = this.pos(i);
+      c.fillStyle = '#0c0a1c'; c.beginPath(); c.ellipse(x, y, 44, 14, 0, 0, 7); c.fill();
+      if (o.up){
+        const k = clamp(Math.min(o.t/.08, (o.dur-o.t)/.08), 0, 1), top = y - 54*k;
+        c.save(); c.beginPath(); c.rect(x-50, y-90, 100, 90); c.clip();
+        c.fillStyle = o.gold ? C.sun : '#8a5a3c'; c.beginPath(); c.ellipse(x, top+36, 30, 36, 0, 0, 7); c.fill();
+        c.fillStyle = o.gold ? '#fff3c4' : '#c49272'; c.beginPath(); c.ellipse(x, top+42, 18, 14, 0, 0, 7); c.fill();
+        c.fillStyle = C.deep;
+        c.beginPath(); c.arc(x-10, top+24, 3.5, 0, 7); c.fill();
+        c.beginPath(); c.arc(x+10, top+24, 3.5, 0, 7); c.fill();
+        c.fillStyle = '#ff8fa3'; c.beginPath(); c.ellipse(x, top+35, 6, 4, 0, 0, 7); c.fill();
+        c.restore();
+      }
+      c.fillStyle = '#4a3f8f'; c.beginPath(); c.ellipse(x, y+1, 46, 12, 0, 0, Math.PI); c.fill();
+    });
+    for (const p of this.pops){ c.globalAlpha = clamp(p.t*2,0,1); label(c, p.txt, p.x, p.y, 14, C.sun) }
+    c.globalAlpha = 1;
+    if (this.state==='ready') banner(c,W,H,'ATRAPA EL TOPO',['Toca los topos antes de que se escondan','Tienes 30 segundos'],'#e0a46b');
+    if (this.state==='over') banner(c,W,H,'¡TIEMPO!',[`${this.score} puntos`,'Toca para jugar otra'],C.sun);
+  }
+};
+
+const GAMES = {dash:Dash, flappy:Flappy, tetris:Tetris, snake:Snake, '2048':G2048, invaders:Invaders, breakout:Breakout, pong:Pong, mines:Mines, mole:Mole};
 
 /* ---------- Gestor ---------- */
 const cv = $('#cv'), ctx = cv.getContext('2d');
 let cur = null, paused = false, last = 0, best = 0;
 const dpr = Math.min(2, window.devicePixelRatio || 1);
 
+$('#grid').innerHTML = Object.values(GAMES).map(g => `
+  <button class="cart" data-game="${g.id}" style="--c:${g.color}">
+    <canvas class="thumb" width="360" height="270"></canvas>
+    <span class="cart-body">
+      <span class="cart-name">${g.name}</span>
+      <span class="cart-desc">${g.desc}</span>
+      <span class="cart-meta"><span class="keys">${g.keys}</span><span class="chip">REC <b data-best="${g.id}">0</b></span></span>
+    </span>
+  </button>`).join('');
+
 function drawThumbs(){
   document.querySelectorAll('.cart').forEach(card => {
     const g = GAMES[card.dataset.game], c = card.querySelector('canvas').getContext('2d');
-    g.demo(); c.save(); c.clearRect(0,0,360,270); c.translate(0,-g.thumbY); g.draw(c); c.restore();
+    const s = Math.min(1, Math.max(360/g.w, 270/g.h));
+    g.demo(); c.save(); c.fillStyle = C.deep; c.fillRect(0,0,360,270);
+    c.scale(s,s); c.translate(0,-g.thumbY); g.draw(c); c.restore();
   });
 }
 function refreshBest(){ document.querySelectorAll('[data-best]').forEach(el => el.textContent = store.get(el.dataset.best)) }
@@ -499,9 +947,9 @@ function buildPad(g){
     const el = document.createElement('button');
     el.textContent = b.l; el.setAttribute('aria-label', b.a); if (b.wide) el.className='wide'; if (b.area) el.style.gridArea = b.area;
     let t1, t2;
-    const stop = () => { clearTimeout(t1); clearInterval(t2) };
+    const stop = () => { clearTimeout(t1); clearInterval(t2); if (b.held) held.delete(b.a) };
     el.addEventListener('pointerdown', e => {
-      e.preventDefault(); act(b.a);
+      e.preventDefault(); if (b.held) held.add(b.a); act(b.a);
       if (b.hold){ t1 = setTimeout(() => t2 = setInterval(() => act(b.a), 70), 220) }
     });
     ['pointerup','pointerleave','pointercancel'].forEach(ev => el.addEventListener(ev, stop));
@@ -512,16 +960,15 @@ function buildPad(g){
 
 function open(id){
   const g = GAMES[id]; if (!g) return;
-  cur = g; paused = false; g.reset(); best = store.get(g.id);
+  cur = g; paused = false; held.clear(); g.reset(); best = store.get(g.id);
   cv.width = g.w*dpr; cv.height = g.h*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
   cv.style.width = `min(100%, ${(g.w/g.h*64).toFixed(1)}vh, ${g.w*1.35}px)`;
   const sec = $('#game'); sec.style.setProperty('--c', g.color);
   $('#gname').textContent = g.name; $('#hint').innerHTML = g.hint; buildPad(g);
-  $('#menu').hidden = true; sec.hidden = false; window.scrollTo(0,0); cv.focus?.();
+  $('#menu').hidden = true; sec.hidden = false; window.scrollTo(0,0);
 }
 function close(){
-  cur = null; $('#game').hidden = true; $('#menu').hidden = false; refreshBest();
-  const card = document.querySelector('.cart:focus-visible'); if (card) card.focus();
+  cur = null; held.clear(); $('#game').hidden = true; $('#menu').hidden = false; refreshBest();
 }
 function act(a){
   if (!cur) return;
@@ -531,32 +978,54 @@ function act(a){
 }
 
 const KEYS = {ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',
-  Space:'action',Enter:'action',KeyX:'rot',KeyP:'pause'};
+  Space:'action',Enter:'action',KeyX:'rot',KeyP:'pause',KeyF:'flag'};
+for (let i=1;i<=9;i++){ KEYS['Digit'+i] = 'n'+i; KEYS['Numpad'+i] = 'n'+i }
 addEventListener('keydown', e => {
   if (!cur) return;
   if (e.code==='Escape'){ close(); return }
   const a = KEYS[e.code]; if (!a) return;
   if (e.target.closest && e.target.closest('button') && e.code==='Enter') return;
   e.preventDefault();
+  held.add(a);
   if (e.repeat && !(cur.repeatOK && ['left','right','down'].includes(a))) return;
   act(a);
 });
+addEventListener('keyup', e => { const a = KEYS[e.code]; if (a) held.delete(a) });
+addEventListener('blur', () => held.clear());
 
-let sx=0, sy=0, down=false;
+let sx=0, sy=0, st=0, down=false;
+const lp = e => { const r = cv.getBoundingClientRect(); return [(e.clientX-r.left-cv.clientLeft)*cur.w/cv.clientWidth, (e.clientY-r.top-cv.clientTop)*cur.h/cv.clientHeight] };
 cv.addEventListener('pointerdown', e => {
   if (!cur) return; e.preventDefault();
-  if (cur.tapOnDown){ act('tap'); return }
-  sx=e.clientX; sy=e.clientY; down=true;
+  try { cv.setPointerCapture(e.pointerId) } catch(_){}
+  held.add('ptr'); down = true; sx = e.clientX; sy = e.clientY; st = performance.now();
+  if (paused){ paused = false; down = false; return }
+  const [x,y] = lp(e);
+  if (cur.drag) cur.drag(x, y, true);
+  if (cur.press){ cur.press(x, y); down = false; return }
+  if (cur.tapOnDown){ act('tap'); down = false }
+});
+cv.addEventListener('pointermove', e => {
+  if (!cur || !cur.drag) return;
+  if (e.pointerType!=='mouse' && !held.has('ptr')) return;
+  const [x,y] = lp(e); cur.drag(x, y, held.has('ptr'));
 });
 cv.addEventListener('pointerup', e => {
-  if (!cur || !down) return; down=false;
-  const dx=e.clientX-sx, dy=e.clientY-sy;
-  if (Math.max(Math.abs(dx),Math.abs(dy)) < 22){ act('tap'); return }
+  held.delete('ptr');
+  if (!cur || !down) return; down = false;
+  const dx = e.clientX-sx, dy = e.clientY-sy;
+  if (Math.max(Math.abs(dx),Math.abs(dy)) < 22){
+    if (cur.click){ const [x,y] = lp(e); cur.click(x, y, {right:e.button===2, long:performance.now()-st > 450}) }
+    else act('tap');
+    return;
+  }
+  if (cur.noSwipe) return;
   const d = Math.abs(dx)>Math.abs(dy) ? (dx>0?'right':'left') : (dy>0?'down':'up');
   act((cur.swipe && cur.swipe[d]) || d);
 });
-cv.addEventListener('pointercancel', () => down=false);
-document.addEventListener('visibilitychange', () => { if (document.hidden && cur) paused = true });
+cv.addEventListener('pointercancel', () => { held.delete('ptr'); down = false });
+cv.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('visibilitychange', () => { if (document.hidden && cur){ paused = true; held.clear() } });
 
 $('#back').addEventListener('click', close);
 document.querySelectorAll('.cart').forEach(card => card.addEventListener('click', () => open(card.dataset.game)));
