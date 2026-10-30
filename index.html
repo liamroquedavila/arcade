@@ -146,11 +146,11 @@ function rr(c, x, y, w, h, r){
 /* ---------- GEOMETRY DASH ---------- */
 const Dash = {
   id:'dash', name:'Geometry Dash', w:480, h:300, color:'#ff5fa2', thumbY:0, tapOnDown:true,
-  desc:'Niveles infinitos cada vez más rápidos, con pinchos, saltadores, orbes y tramos en cohete.', keys:'Espacio o toque',
+  desc:'Niveles infinitos y difíciles: ritmo, torres, piedras sobre pinchos, saltadores, orbes y tramos en cohete.', keys:'Espacio o toque',
   pad:[{a:'left',l:'◀'},{a:'action',l:'Saltar',wide:true,held:1},{a:'right',l:'▶'}],
   hint:'<kbd>Espacio</kbd>, <kbd>↑</kbd>, clic o toque para saltar. En el cohete, mantén pulsado para subir. Las almohadillas amarillas te lanzan y los aros amarillos dan un salto extra. Antes de empezar, <kbd>◀ ▶</kbd> cambian de nivel.',
   G:240, S:28, X:110, lvl:1, attempt:1,
-  speed(){ return Math.min(250 + (this.lvl-1)*18, 430) },
+  speed(){ return Math.min(270 + (this.lvl-1)*20, 470) },
   reset(){
     this.max = Math.max(1, store.get('dash-max'));
     if (!this.lvlSet){ this.lvl = this.max; this.lvlSet = true }
@@ -164,13 +164,13 @@ const Dash = {
     const R = rng(this.lvl*7919 + 13), L = this.lvl, B = 30, G = this.G;
     this.obs = [];
     this.len = 2400 + L*600;
-    const ships = L < 2 ? [] : L < 5 ? [.45] : [.3, .68];
+    const ships = L < 2 ? [] : L < 4 ? [.45] : L < 8 ? [.3, .68] : [.22, .5, .78];
     let x = 600, si = 0;
     while (x < this.len - 320){
       if (si < ships.length && x > this.len*ships[si]){
         si++;
-        const sl = 800 + L*80, gap = Math.max(92, 150 - L*6), step = Math.max(120, 175 - L*6, this.speed()*.35);
-        const maxD = Math.min(75, 30 + L*5, step/this.speed()*200);
+        const sl = 800 + L*80, gap = Math.max(78, 128 - L*5), step = Math.max(120, 175 - L*6, this.speed()*.35);
+        const maxD = Math.min(75, 30 + L*5, step/this.speed()*150);
         this.obs.push({k:'p', x, w:24, mode:'ship'});
         let gy = G - 70;
         for (let px = x + 240; px < x + sl; px += step){
@@ -181,11 +181,11 @@ const Dash = {
         this.obs.push({k:'p', x:x+sl+60, w:24, mode:'cube'});
         x += sl + 280; continue;
       }
-      const pool = ['s1','s2','hop','stairs'];
-      if (L >= 2) pool.push('s3','plat');
-      if (L >= 3) pool.push('pad','bspike','stairs3');
-      if (L >= 4) pool.push('orb','s3');
-      if (L >= 6) pool.push('orb','pad','plat','bspike');
+      const pool = ['s1','s2','s3','hop','stairs','rhythm'];
+      if (L >= 2) pool.push('plat','stones','s3');
+      if (L >= 3) pool.push('pad','bspike','stairs3','towers');
+      if (L >= 4) pool.push('orb','rhythm','stones');
+      if (L >= 6) pool.push('orb','pad','towers','s3');
       let len;
       switch (pool[R()*pool.length|0]){
         case 's1': this.spike(x); len = B; break;
@@ -197,9 +197,12 @@ const Dash = {
         case 'plat': this.col(x,1); this.obs.push({k:'b', x:x+3*B, y:G-60, w:5*B, h:14}); for (let i=2;i<8;i++) this.spike(x+i*B); len = 8*B; break;
         case 'bspike': for (let i=0;i<7;i++) this.col(x+i*B,1); this.spike(x+4*B, G-30); len = 7*B; break;
         case 'pad': this.obs.push({k:'pad', x, y:G-8, w:30, h:8}); for (let i=2;i<7;i++) this.spike(x+i*B); len = 8*B; break;
+        case 'rhythm': { const k = Math.max(4, Math.ceil((this.speed()*.45 + 25)/B)); this.spike(x); this.spike(x+k*B); this.spike(x+2*k*B); len = (2*k+1)*B; break }
+        case 'stones': { const k = Math.max(2, Math.round(this.speed()*.445/B) - 1); for (let i=0;i<4;i++){ const b0 = x+i*(k+1)*B; this.col(b0,1); this.col(b0+B,1); if (i<3) for (let j=2;j<=k;j++) this.spike(b0+j*B) } len = (3*(k+1)+2)*B; break }
+        case 'towers': this.col(x,2); this.col(x+B,2); for (let i=2;i<5;i++) this.spike(x+i*B); this.col(x+5*B,2); this.col(x+6*B,2); len = 7*B; break;
         case 'orb': for (let i=0;i<7;i++) this.spike(x+i*B); this.obs.push({k:'o', x:x+75, y:G-105, w:30, h:30}); len = 7*B; break;
       }
-      x += len + Math.max(130, 250 - L*12, this.speed()*.55) + R()*130;
+      x += len + Math.max(this.speed()*.42, 220 - L*14) + R()*100;
     }
   },
   demo(){
@@ -244,9 +247,9 @@ const Dash = {
     const wants = hold || this.queued > 0;
     for (const o of this.obs) if (o.k==='p' && !o.used && cx + S > o.x){ o.used = true; this.mode = o.mode; this.flash = .3; this.vy = Math.min(this.vy, 0) }
     if (this.mode==='ship') return this.shipStep(dt, hold, cx);
-    if (this.ground && wants){ this.vy = -640; this.ground = false; this.queued = 0 }
+    if (this.ground && wants){ this.vy = -590; this.ground = false; this.queued = 0 }
     const prevB = this.y + S;
-    this.vy += 2300*dt; this.y += this.vy*dt;
+    this.vy += 2650*dt; this.y += this.vy*dt;
     this.ground = false;
     if (this.y + S >= this.G){ this.y = this.G - S; this.vy = 0; this.ground = true }
     for (const o of this.obs){
@@ -262,14 +265,14 @@ const Dash = {
         if (cx + S > o.x && cx < o.x + o.w && this.y + S >= o.y - 2 && this.vy >= 0){ this.vy = -900; this.ground = false; this.flash = .12 }
       } else if (o.k==='o'){
         const dx = (cx + S/2) - (o.x + 15), dy = (this.y + S/2) - (o.y + 15);
-        if (!o.used && !this.ground && wants && Math.abs(dx) < 30 && Math.abs(dy) < 30){ o.used = true; this.vy = -660; this.queued = 0 }
+        if (!o.used && !this.ground && wants && Math.abs(dx) < 30 && Math.abs(dy) < 30){ o.used = true; this.vy = -600; this.queued = 0 }
       }
     }
     const q = Math.PI/2;
     if (this.ground){
       this.rot = Math.round(this.rot/q)*q;
       if (Math.random() < .5) this.parts.push({x:cx+2, y:this.y+S-3, vx:-60-Math.random()*60, vy:-Math.random()*60, life:.25, col:C.sun});
-    } else this.rot += 5.6*dt;
+    } else this.rot += 7*dt;
   },
   shipStep(dt, hold, cx){
     const H = 20, S = this.S;
